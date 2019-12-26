@@ -1,6 +1,6 @@
 # Things Todo serverless
 
-Backend side of the things todo app which let you find events and activites for kids. It does work, but it's not a production ready solution - it lacks, for instance, a proper error handling and DLQ setup.
+Backend side of the things todo app which lets you find events and activities for kids. It does work, but it's not a production ready solution - it lacks, for instance, a proper error handling and DLQ setup.
 
 ## Getting Started
 
@@ -15,11 +15,11 @@ For building and deploying you need a [Serverless framework](https://serverless.
 
 The project is organized by services and monorepo approach has been used. However, the GraphQL API cannot be split and be part of the services, so it's deployable as one unit (in fact there are 4 different APIs for different actors, namely organisers, authenticated users, guests and audit).
 
-Each module is deplyoyable by the following command
+Each module is deployable by the following command
 ```
 sls --stage test deploy
 ```
-where stage is the name of the environement you want to deploy into.
+where stage is the name of the environment you want to deploy into.
 You can also deploy only individual functions
 ```
 sls --stage test deploy -f <function_name_here>
@@ -50,7 +50,7 @@ A convenience lambda function for deleting indices is also provided - *esDeleteI
 
 ## Tests
 
-Most of the tests are integraiton tests and require AWS environment (The tests assume the targeting services/servers are available during the test - they don't start these services themselves). You can use a real AWS cloud (but be aware of the costs) or you can start up a mock/local server to mimic AWS environment. It has been tested against [Localstack](https://github.com/localstack/localstack) and [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.html). However a local Elasticsearch was also needed, because [Localstack](https://github.com/localstack/localstack) didn't support Elasticsearch 7+ format yet. The services used by tests are:
+Most of the tests are integration tests and require AWS environment (The tests assume the targeting services/servers are available during the test - they don't start these services themselves). You can use a real AWS cloud (but be aware of the costs) or you can start up a mock/local server to mimic AWS environment. It has been tested against [Localstack](https://github.com/localstack/localstack) and [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.html). However a local Elasticsearch was also needed because [Localstack](https://github.com/localstack/localstack) didn't support Elasticsearch 7+ format yet. The services used by tests are:
 
 * DynamoDB
 * Elasticsearch
@@ -58,7 +58,7 @@ Most of the tests are integraiton tests and require AWS environment (The tests a
 * SNS
 * SES
   
-### Setting up test environement
+### Setting up test environment
 
 The easiest way to setup a testing environment is by using docker, e.g. to setup [Localstack](https://github.com/localstack/localstack) with DynamoDB, SQS, SNS and SES ports exposed call the following command
 
@@ -84,17 +84,17 @@ To run tests type
 npm test -- --runInBand
 ```
 
-Due to non transactional nature of the DynamoDB it's important to execute tests sequentially (*runInBand* flag), so the tests don't intefere with each other.
+Due to non transactional nature of the DynamoDB it's important to execute tests sequentially (*runInBand* flag), so the tests don't interfere with each other.
 
 ## Architecture
 
 The project (this and [ttd_terraform](https://github.com/mjedrasz/ttd_terraform)/[ttd_infra](https://github.com/mjedrasz/ttd_infra) duo) consists of several AWS lambda functions and AWS services.
 * Cognito - authentication and authorization
 * AppSync - managed GraphQL service
-* Elasticsearh service - managed Elasticsearch
+* Elasticsearch service - managed Elasticsearch
 * Route 53 - DNS
 * S3 - serving static assets and hosting web app
-* SES - sending e-mails
+* SES - sending emails
 * CloudWatch - logs, alarms and triggers
 * SNS - pub/sub messaging
 * SQS - queue service
@@ -105,10 +105,10 @@ All services but Elasticsearch follow serverless paradigm. The high-level archit
 
 ### Single table design
 
-My first iteration of the DynamoDB tables design closely resembled a familar relational data model, i.e. each entity type had it's own table. It did work, but it 'wasted' precious read/write capacities. Then I came accross this fantastic [Advanced Design Patterns for DynamoDB](https://www.youtube.com/watch?v=HaEPXoXVf2k&feature=youtu.be) talk and read, in the oficial AWS Best practices [guidelines](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/bp-modeling-nosql.html), the following note
+My first iteration of the DynamoDB tables design closely resembled a familiar relational data model, i.e. each entity type had its own table. It did work, but it 'wasted' precious read/write capacities. Then I came across this fantastic [Advanced Design Patterns for DynamoDB](https://www.youtube.com/watch?v=HaEPXoXVf2k&feature=youtu.be) talk and read, in the official AWS Best practices [guidelines](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/bp-modeling-nosql.html), the following note
 > In general, you should maintain as few tables as possible in a DynamoDB application. Most well-designed applications require only one table. (...) A single table with inverted indexes can usually enable simple queries to create and retrieve the complex hierarchical data structures required   by your application.
 
-I found the single table design with overloaded indices interesting and gave it a try (However, I do think it focuses mostly on one dimension only, i.e. cost efectivness, and makes other things harder, e.g. code maintenance, data extraction. Additionally, the new, on-demand, payment scheme alleviates that need - you don't "see" read/write capacities anymore).
+I found the single table design with overloaded indices interesting and gave it a try (However, I do think it focuses mostly on one dimension only, i.e. cost effectiveness, and makes other things harder, e.g. code maintenance, data extraction. Additionally, the new, on-demand, payment scheme alleviates that need - you don't "see" read/write capacities anymore).
 
 I ended up with the following design.
 
@@ -120,7 +120,7 @@ I ended up with the following design.
 | ttdId | FAV#usrId   | STATUS                  |                      |
 | bkgId | BKG         | STATUS#usrId#date#ttdId |                      |
 
-The indentified access patterns are as follows
+The identified access patterns are as follows
 
 | access pattern                                        | index      | conditions                                         | dynamoDb operation |
 | ----------------------------------------------------- | ---------- | -------------------------------------------------- | ------------------ |
