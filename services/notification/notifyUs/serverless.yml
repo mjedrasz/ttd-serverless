@@ -1,0 +1,27 @@
+---
+functions:
+  notifyUs:
+    runtime: nodejs12.x
+    name: ${self:provider.stage}-lambda-notify-us
+    handler: notifyUs/index.handler
+    description: Notify us
+    memorySize: 128 # optional, in MB, default is 1024
+    timeout: 10 # optional, default is 6
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - sqs:SendMessage
+          - sqs:GetQueueUrl
+        Resource:
+          - "arn:aws:sqs:${self:provider.region}:${self:custom.awsAccountId}:${self:custom.emailQueue}"   
+    environment:
+      SQS_REGION: ${self:provider.region}
+      EMAIL_QUEUE: ${self:custom.emailQueue}
+      CONTACT_US_RECIPIENTS: ${ssm:/${self:provider.stage}/lambda/contact-us/recipients}
+      TEMPLATE_NAME: notifyUs
+    events:
+      - sns:
+          arn: ${self:custom.fanoutTopicArn}
+          filterPolicy:
+            type:
+              - TTD_PUBLISHED

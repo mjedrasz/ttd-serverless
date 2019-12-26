@@ -1,0 +1,41 @@
+{
+    "name": "testplace",
+    "description": "desc",
+    "type": "EVENT",
+    "where": {
+        "address": "where",
+        "location": {
+            "lat": 21,
+            "lon": 55
+        }
+    },
+    "contact": {
+        "email": "aaa@onet.pl",
+        "phone": "434422333",
+        "www": "https://example.com"
+    },
+    "target": {
+        "age": {
+            "from": 3,
+            "to": 23
+        },
+        "type": [
+            "CHILD"
+        ]
+    },
+    "bookingMandatory": false,
+    "adultMandatory": false,
+    "category": "RESTAURANT",
+    "when": {
+        "dateTime": {
+            "from": "2019-12-01T10:00:00Z",
+            "to": "2019-12-31T12:00:00Z"
+        },
+        "occurrences": [
+        ]
+    },
+    "id": "ttdid-123",
+    "sk": "TTD",
+    "orgId": "orgid-123",
+    "gsi1sk": "DRAFT#orgid-123"
+}

@@ -1,0 +1,125 @@
+query find {
+  findThingsToDo(filter: {
+    when: {
+      # date: {
+      #   from: "2019-12-10"
+      #   to: "2019-12-26"
+      # }
+      # time: {
+      #   from: "04:00:00Z"
+      #   to: "07:00:00Z"
+      # }
+    }
+  }) {
+    edges {
+      node {
+        id
+        name
+        myFavorite
+        organiser {
+          name
+        }
+        description
+        when {
+          dateTime {
+            from
+            to
+          
+          }
+          occurrences {
+            dayOfWeek
+            hours {
+              from
+              to
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+query byId {
+  thingToDoById(id: "375ca73e-86fb-52ad-b542-652f8be4e000") {
+    id
+    name
+    organiser {
+      name
+    }
+  }
+}
+
+query children {
+  myChildren {
+    id
+    name
+    birthDate
+  }
+}
+
+query childbyid {
+  myChildById(id: "6e96cd6a-dae8-43b2-9b07-eee3697a254a") {
+    id
+    name
+  }
+}
+
+query myfavs {
+  myFavorites {
+    edges {
+      node {
+        id
+        thingToDo {
+          id
+          name
+          organiser {
+            name
+          }
+        }
+      }
+    }
+  }
+}
+
+mutation contact {
+  contactUs(input: {
+    subject: "ddd"
+    body: "fsfddsa"
+    from: "me2"
+  })
+}
+
+mutation addToFavs {
+  addToMyFavorites(input: {
+    id: "ad54a5d7-6e2c-541b-9f7d-2e56cde59ba8"
+  }) {
+    id
+    thingToDo {
+      id
+      name
+      myFavorite
+    }
+  }
+}
+
+mutation addChild {
+  addChild(input: {
+    name: "marta2"
+    birthDate: "1999-09-12"
+  }) {
+    id
+  }
+}
+
+mutation updateChild {
+  updateChild(input: {
+    id: "cfa1c3ca-0997-4eb1-988b-841d48dd5dd7"
+    child: {
+      name: "ddd"
+      birthDate: "2001-12-12"
+    }
+  }) {
+    id
+    name
+  }
+}

@@ -1,0 +1,31 @@
+---
+functions:
+  reindexThingsToDo:
+    runtime: nodejs12.x
+    name: ${self:provider.stage}-lambda-reindex-things-todo
+    handler: esReindex/index.handler
+    description: Reindex things to do
+    memorySize: 1024 # optional, in MB, default is 1024
+    timeout: 300 # optional, default is 6
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - es:*
+        Resource:
+          - "arn:aws:es:${self:provider.region}:${self:custom.awsAccountId}:domain/${self:custom.esDomainName}/*"
+          - "arn:aws:es:${self:provider.region}:${self:custom.awsAccountId}:domain/${self:custom.esDomainName}"
+      - Effect: Allow
+        Action:
+          - lambda:InvokeFunction
+        Resource:
+          - "arn:aws:lambda:${self:provider.region}:${self:custom.awsAccountId}:function:${self:provider.stage}-lambda-index-things-todo"                 
+    events:
+    - schedule:
+        rate: cron(0 2 ? * MON *)
+        name: ${self:provider.stage}-reindex-things-todo
+        description: 'Reindex things todo'
+    environment:
+      ES_ENDPOINT: "https://${self:custom.esEndpoint}"
+      ES_INDEX: ${self:custom.thingsToDoEsIndex}
+      ES_REGION: ${self:provider.region}
+      INDEX_FN_NAME: ${self:provider.stage}-lambda-index-things-todo

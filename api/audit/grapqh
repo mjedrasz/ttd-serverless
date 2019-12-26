@@ -1,0 +1,32 @@
+query bystatus {
+  pending {
+    edges {
+      node {
+        id
+        name
+        organiser {
+          name
+        }
+      }
+    }
+  }
+}
+mutation approve {
+  approve(input: {
+    id: "22d2912f-da36-53db-aa2c-c3724c11ed64"
+  }) {
+    id
+    name
+  }
+}
+mutation reject {
+  reject(input: {
+    id: "e972056c-af06-5a43-8179-955efc430b61" 
+  }) {
+    id
+    name
+  	organiser {
+    	name
+ 	 }
+  }
+}

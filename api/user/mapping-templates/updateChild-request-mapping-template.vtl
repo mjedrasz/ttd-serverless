@@ -1,0 +1,23 @@
+$util.qr($ctx.stash.put("x-correlation-id", $ctx.request.headers['x-amzn-trace-id'].substring(16)))
+{
+    "version": "2017-02-28",
+    "operation": "PutItem",
+    "key": {
+        "id": { "S":  "$ctx.args.input.id" },
+        "sk": { "S": "CHL#$ctx.identity.sub" }
+    },
+    "attributeValues": {
+        "name": { "S": "$ctx.args.input.child.name" },
+        "birthDate": { "S": "$ctx.args.input.child.birthDate" },
+        "gsi1sk": { "S": "ACTIVE" },
+        "__context__": $util.dynamodb.toDynamoDBJson({
+            "x-correlation-id": "$ctx.stash['x-correlation-id']"
+        }),
+        "__event__": $util.dynamodb.toDynamoDBJson({
+            "type": "CHL_UPDATED"
+        })
+    },
+    "condition" : {
+        "expression"       : "attribute_exists(id)"
+    }
+}

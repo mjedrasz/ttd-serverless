@@ -1,0 +1,141 @@
+appSync:
+  name: ${self:provider.stage}-organiser-api
+  authenticationType: AMAZON_COGNITO_USER_POOLS
+  userPoolConfig:
+    awsRegion: ${self:provider.region}
+    defaultAction: ALLOW
+    userPoolId: ${ssm:/${self:provider.stage}/cognito/user-pools/org/id}
+#     appIdClientRegex: # optional
+#     region: # defaults to provider region
+  mappingTemplatesLocation: "./organiser/mapping-templates"
+  logConfig:
+    loggingRoleArn: { Fn::GetAtt: [AppSyncLoggingServiceRole, Arn] } # Where AppSyncLoggingServiceRole is a role with CloudWatch Logs write access
+    level: ALL # Logging Level: NONE | ERROR | ALL
+  mappingTemplates:
+    - dataSource: esInstance
+      type: Query
+      field: thingsToDo
+      request: findThingsToDo-request-mapping-template.vtl
+      response: findThingsToDo-response-mapping-template.vtl
+    - dataSource: OneTable
+      type: Query
+      field: thingToDoById
+      request: thingToDoById-request-mapping-template.vtl
+      response: thingToDoById-response-mapping-template.vtl
+    - dataSource: publishThingToDo
+      type: Mutation
+      field: publish
+      request: publish-request-mapping-template.vtl
+      response: publish-response-mapping-template.vtl
+    - dataSource: newVersion
+      type: Mutation
+      field: newVersion
+      request: newVersion-request-mapping-template.vtl
+      response: newVersion-response-mapping-template.vtl
+    - dataSource: newVersion
+      type: Mutation
+      field: newVersion
+      request: newVersion-request-mapping-template.vtl
+      response: newVersion-response-mapping-template.vtl
+    - dataSource: createThingToDo
+      type: Mutation
+      field: createThingToDo
+      request: createThingToDo-request-mapping-template.vtl
+      response: createThingToDo-response-mapping-template.vtl
+    - dataSource: updateThingToDo
+      type: Mutation
+      field: updateThingToDo
+      request: updateThingToDo-request-mapping-template.vtl
+      response: updateThingToDo-response-mapping-template.vtl
+    - dataSource: OneTable
+      type: Mutation
+      field: saveProfile
+      request: saveProfile-request-mapping-template.vtl
+      response: saveProfile-response-mapping-template.vtl
+    - dataSource: contactUs
+      type: Mutation
+      field: contactUs
+      request: contactUs-request-mapping-template.vtl
+      response: contactUs-response-mapping-template.vtl
+    - dataSource: OneTable
+      type: Mutation
+      field: removeThingToDo
+      request: removeThingToDo-request-mapping-template.vtl
+      response: removeThingToDo-response-mapping-template.vtl
+    - dataSource: OneTable
+      type: Query
+      field: thingsToDoByStatus
+      request: thingsToDoByStatus-request-mapping-template.vtl
+      response: thingsToDoByStatus-response-mapping-template.vtl
+    - dataSource: OneTable
+      type: Query
+      field: profile
+      request: profile-request-mapping-template.vtl
+      response: profile-response-mapping-template.vtl
+    - dataSource: imageUri
+      type: ImageObject
+      field: imageUri
+      request: imageUri-request-mapping-template.vtl
+      response: imageUri-response-mapping-template.vtl    
+  schema: ./organiser/schema.graphql
+  serviceRole: appSync
+  dataSources:
+    - type: AMAZON_ELASTICSEARCH
+      name: esInstance
+      description: 'ElasticSearch'
+      config:
+        endpoint: "https://${self:custom.esEndpoint}"
+        serviceRoleArn: { Fn::GetAtt: [AppSyncESOrganiserServiceRole, Arn] }
+    - type: AMAZON_DYNAMODB
+      name: OneTable
+      description: 'DynamoDb'
+      config:
+        tableName: ${self:custom.oneTableName}
+        iamRoleStatements:
+          - Effect: "Allow"
+            Action:
+              - "dynamodb:GetItem"
+              - "dynamodb:Query"
+              - "dynamodb:Scan"
+              - "dynamodb:PutItem"
+              - "dynamodb:DeleteItem"
+              - "dynamodb:UpdateItem"
+            Resource:
+              - 'arn:aws:dynamodb:${self:provider.region}:${self:custom.awsAccountId}:table/${self:custom.oneTableName}'
+              - 'arn:aws:dynamodb:${self:provider.region}:${self:custom.awsAccountId}:table/${self:custom.oneTableName}/*'        
+    - type: AWS_LAMBDA
+      name: createThingToDo
+      description: 'Lambda DataSource'
+      config:
+        lambdaFunctionArn:
+          "arn:aws:lambda:${self:provider.region}:${self:custom.awsAccountId}:function:${self:provider.stage}-lambda-create-thing-todo"
+    - type: AWS_LAMBDA
+      name: updateThingToDo
+      description: 'Lambda DataSource'
+      config:
+        lambdaFunctionArn:
+          "arn:aws:lambda:${self:provider.region}:${self:custom.awsAccountId}:function:${self:provider.stage}-lambda-update-thing-todo"
+    - type: AWS_LAMBDA
+      name: contactUs
+      description: 'Lambda DataSource'
+      config:
+        lambdaFunctionArn:
+          "arn:aws:lambda:${self:provider.region}:${self:custom.awsAccountId}:function:${self:provider.stage}-lambda-contact-us"
+    - type: AWS_LAMBDA
+      name: newVersion
+      description: 'Lambda DataSource'
+      config:
+        lambdaFunctionArn:
+          "arn:aws:lambda:${self:provider.region}:${self:custom.awsAccountId}:function:${self:provider.stage}-lambda-new-version"
+    - type: AWS_LAMBDA
+      name: publishThingToDo
+      description: 'Lambda DataSource'
+      config:
+        lambdaFunctionArn:
+          "arn:aws:lambda:${self:provider.region}:${self:custom.awsAccountId}:function:${self:provider.stage}-lambda-publish-thing-todo"
+    - type: NONE
+      name: imageUri
+      description: 'Compute image URI'      
+  substitutions:
+    env: "${self:provider.stage}"
+    bucketUri: "${self:custom.assetsBucketUri}"

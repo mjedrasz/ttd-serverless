@@ -1,0 +1,37 @@
+---
+functions:
+  fanout:
+    runtime: nodejs12.x
+    name: ${self:provider.stage}-lambda-fanout
+    handler: fanout/index.handler
+    description: Allows Lambda functions to call AWS services on your behalf.
+    memorySize: 128 # optional, in MB, default is 1024
+    timeout: 10
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:DescribeTable
+          - dynamodb:Scan
+        Resource:
+          - "arn:aws:dynamodb:${self:provider.region}:${self:custom.awsAccountId}:table/${self:custom.oneTableName}"   
+      - Effect: Allow
+        Action:
+          - dynamodb:DescribeStream
+          - dynamodb:GetRecords
+          - dynamodb:GetShardIterator
+          - dynamodb:ListStreams
+        Resource: ${self:custom.oneTableStreamArn}          
+      - Effect: Allow
+        Action:
+          - sns:Publish
+        Resource: ${self:custom.fanoutTopicArn}          
+    environment:
+      DYNAMODB_REGION: ${self:provider.region}
+      FANOUT_TOPIC: ${self:custom.fanoutTopicArn}
+      SNS_REGION: ${self:provider.region}
+    events:
+      - stream:
+          type: dynamodb
+          arn: ${self:custom.oneTableStreamArn}
+          batchSize: 100
+          startingPosition: TRIM_HORIZON

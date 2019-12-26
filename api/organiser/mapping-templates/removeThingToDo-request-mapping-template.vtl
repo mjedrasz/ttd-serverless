@@ -1,0 +1,30 @@
+$util.qr($ctx.stash.put("x-correlation-id", $ctx.request.headers['x-amzn-trace-id'].substring(16)))
+{
+    "version": "2017-02-28",
+    "operation": "UpdateItem",
+    "key": {
+        "id": { "S": "$ctx.args.input.id" },
+        "sk": { "S": "TTD" }
+    },
+    "update" : {
+        "expression" : "SET gsi1sk :removed, #event :event",
+        "expressionNames" : {
+            "#event": "__event__"
+        },
+        "expressionValues" : {
+            ":removed" : { "S" : "REMOVED#${ctx.identity.sub}" },
+            ":event": { 
+                "M": {
+                    "type": { "S" : "TTD_REMOVED" }
+                }
+            }
+        }
+    },
+    "condition" : {
+        "expression" : "attribute_exists(id) and gsi1sk = :draft",
+        "expressionValues" : {
+            ":draft" : { "S" : "DRAFT#${ctx.identity.sub}" }
+        }
+    }
+
+}

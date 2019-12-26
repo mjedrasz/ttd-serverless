@@ -1,0 +1,20 @@
+---
+functions:
+  approveThingToDo:
+    runtime: nodejs12.x
+    name: ${self:provider.stage}-lambda-approve-thing-todo
+    handler: approveThingToDo/index.handler
+    description: Approves a thing todo
+    memorySize: 192 # optional, in MB, default is 1024
+    timeout: 10 # optional, default is 6
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:PutItem
+          - dynamodb:GetItem
+          - dynamodb:UpdateItem
+        Resource:
+          - "arn:aws:dynamodb:${self:provider.region}:${self:custom.awsAccountId}:table/${self:custom.oneTableName}"    
+    environment:
+      DYNAMODB_REGION: ${self:provider.region}
+      DYNAMODB_ONE_TABLE: ${self:custom.oneTableName}

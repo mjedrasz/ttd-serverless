@@ -1,0 +1,78 @@
+appSync:
+  name: ${self:provider.stage}-guest-api
+  authenticationType: OPENID_CONNECT
+  openIdConnectConfig:
+    issuer: "https://cognito-identity.amazonaws.com"
+#    clientId:
+#    iatTTL:
+#    authTTL:
+  mappingTemplatesLocation: "./guest/mapping-templates"
+  logConfig:
+    loggingRoleArn: { Fn::GetAtt: [AppSyncLoggingServiceRole, Arn] }
+    level: ALL # Logging Level: NONE | ERROR | ALL
+  mappingTemplates:
+    - dataSource: esInstance
+      type: Query
+      field: findThingsToDo
+      request: findThingsToDo-request-mapping-template.vtl
+      response: findThingsToDo-response-mapping-template.vtl
+    - dataSource: OneTable
+      type: Query
+      field: thingToDoById
+      request: thingToDoById-request-mapping-template.vtl
+      response: thingToDoById-response-mapping-template.vtl
+    - dataSource: contactUs
+      type: Mutation
+      field: contactUs
+      request: contactUs-request-mapping-template.vtl
+      response: contactUs-response-mapping-template.vtl
+    - dataSource: organisersByIds
+      type: ThingToDo
+      field: organiser
+      request: organisersByIds-request-mapping-template.vtl
+      response: organisersByIds-response-mapping-template.vtl
+    - dataSource: imageUri
+      type: ImageObject
+      field: imageUri
+      request: imageUri-request-mapping-template.vtl
+      response: imageUri-response-mapping-template.vtl         
+  schema: ./guest/schema.graphql
+  serviceRole: appSync
+  dataSources:
+    - type: AMAZON_ELASTICSEARCH
+      name: esInstance
+      description: 'ElasticSearch'
+      config:
+        endpoint: "https://${self:custom.esEndpoint}"
+        serviceRoleArn: { Fn::GetAtt: [AppSyncESGuestServiceRole, Arn] }
+    - type: AMAZON_DYNAMODB
+      name: OneTable
+      description: 'DynamoDb'
+      config:
+        tableName: ${self:custom.oneTableName}
+        iamRoleStatements:
+          - Effect: "Allow"
+            Action:
+              - "dynamodb:GetItem"
+              - "dynamodb:Query"
+            Resource:
+              - 'arn:aws:dynamodb:${self:provider.region}:${self:custom.awsAccountId}:table/${self:custom.oneTableName}'
+              - 'arn:aws:dynamodb:${self:provider.region}:${self:custom.awsAccountId}:table/${self:custom.oneTableName}/*'
+    - type: AWS_LAMBDA
+      name: organisersByIds
+      description: 'Lambda DataSource'
+      config:
+        lambdaFunctionArn:
+          "arn:aws:lambda:${self:provider.region}:${self:custom.awsAccountId}:function:${self:provider.stage}-lambda-organisers-by-ids"
+    - type: AWS_LAMBDA
+      name: contactUs
+      description: 'Lambda DataSource'
+      config:
+        lambdaFunctionArn:
+          "arn:aws:lambda:${self:provider.region}:${self:custom.awsAccountId}:function:${self:provider.stage}-lambda-contact-us"
+    - type: NONE
+      name: imageUri
+      description: 'Compute image URI'      
+  substitutions:
+    env: "${self:provider.stage}"
+    bucketUri: "${self:custom.assetsBucketUri}"

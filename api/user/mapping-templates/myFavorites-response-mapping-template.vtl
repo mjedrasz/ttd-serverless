@@ -1,0 +1,16 @@
+#set($results = [])
+#set ($hasNext = !$util.isNull($ctx.result.nextToken))
+{
+    "edges": [
+     	#foreach ($item in $ctx.result.items)
+        	#if ($foreach.count > 1) , #end
+            {
+            	"node": $util.toJson($item)
+            }
+        #end
+    ],
+    "pageInfo": {
+    	"hasNextPage": $hasNext,
+        "endCursor": $util.toJson($util.defaultIfNullOrBlank($ctx.result.nextToken, null))
+    }
+}

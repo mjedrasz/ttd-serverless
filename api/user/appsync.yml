@@ -1,0 +1,152 @@
+appSync:
+  name: ${self:provider.stage}-user-api
+  authenticationType: AMAZON_COGNITO_USER_POOLS
+  userPoolConfig:
+    awsRegion: ${self:provider.region}
+    defaultAction: ALLOW
+    userPoolId: ${ssm:/${self:provider.stage}/cognito/user-pools/user/id}
+#     appIdClientRegex: # optional
+#     region: # defaults to provider region
+  mappingTemplatesLocation: "./user/mapping-templates"
+  logConfig:
+    loggingRoleArn: { Fn::GetAtt: [AppSyncLoggingServiceRole, Arn] }
+    level: ALL # Logging Level: NONE | ERROR | ALL
+  mappingTemplates:
+    - dataSource: esInstance
+      type: Query
+      field: findThingsToDo
+      request: findThingsToDo-request-mapping-template.vtl
+      response: findThingsToDo-response-mapping-template.vtl
+    - dataSource: OneTable
+      type: Query
+      field: thingToDoById
+      request: thingToDoById-request-mapping-template.vtl
+      response: thingToDoById-response-mapping-template.vtl
+    - dataSource: addToMyFavorites
+      type: Mutation
+      field: addToMyFavorites
+      request: addToMyFavorites-request-mapping-template.vtl
+      response: addToMyFavorites-response-mapping-template.vtl
+    - dataSource: OneTable
+      type: Query
+      field: myFavorites
+      request: myFavorites-request-mapping-template.vtl
+      response: myFavorites-response-mapping-template.vtl
+    - dataSource: OneTable
+      type: Query
+      field: myFavoriteById
+      request: myFavoriteById-request-mapping-template.vtl
+      response: myFavoriteById-response-mapping-template.vtl
+    - dataSource: contactUs
+      type: Mutation
+      field: contactUs
+      request: contactUs-request-mapping-template.vtl
+      response: contactUs-response-mapping-template.vtl
+    - dataSource: organisersByIds
+      type: ThingToDo
+      field: organiser
+      request: organisersByIds-request-mapping-template.vtl
+      response: organisersByIds-response-mapping-template.vtl
+    - dataSource: thingsToDoByIds
+      type: MyFavorite
+      field: thingToDo
+      request: thingsToDoByIds-request-mapping-template.vtl
+      response: thingsToDoByIds-response-mapping-template.vtl
+    - dataSource: areMyFavoritesByIds
+      type: ThingToDo
+      field: myFavorite
+      request: areMyFavoritesByIds-request-mapping-template.vtl
+      response: areMyFavoritesByIds-response-mapping-template.vtl
+    - dataSource: OneTable
+      type: Query
+      field: myChildren
+      request: myChildren-request-mapping-template.vtl
+      response: myChildren-response-mapping-template.vtl
+    - dataSource: OneTable
+      type: Query
+      field: myChildById
+      request: myChildById-request-mapping-template.vtl
+      response: myChildById-response-mapping-template.vtl
+    - dataSource: OneTable
+      type: Mutation
+      field: addChild
+      request: addChild-request-mapping-template.vtl
+      response: addChild-response-mapping-template.vtl
+    - dataSource: OneTable
+      type: Mutation
+      field: updateChild
+      request: updateChild-request-mapping-template.vtl
+      response: updateChild-response-mapping-template.vtl
+    - dataSource: imageUri
+      type: ImageObject
+      field: imageUri
+      request: imageUri-request-mapping-template.vtl
+      response: imageUri-response-mapping-template.vtl        
+  schema: ./user/schema.graphql
+  serviceRole: appSync
+  dataSources:
+    - type: AMAZON_ELASTICSEARCH
+      name: esInstance
+      description: 'ElasticSearch'
+      config:
+        endpoint: "https://${self:custom.esEndpoint}"
+        serviceRoleArn: { Fn::GetAtt: [AppSyncESUserServiceRole, Arn] }
+    - type: AMAZON_DYNAMODB
+      name: OneTable
+      description: 'DynamoDb'
+      config:
+        tableName: ${self:custom.oneTableName}
+        iamRoleStatements:
+          - Effect: "Allow"
+            Action:
+              - "dynamodb:GetItem"
+              - "dynamodb:Query"
+              - "dynamodb:Scan"
+              - "dynamodb:PutItem"
+              - "dynamodb:DeleteItem"
+              - "dynamodb:UpdateItem"
+            Resource:
+              - 'arn:aws:dynamodb:${self:provider.region}:${self:custom.awsAccountId}:table/${self:custom.oneTableName}'
+              - 'arn:aws:dynamodb:${self:provider.region}:${self:custom.awsAccountId}:table/${self:custom.oneTableName}/*'         
+    - type: AWS_LAMBDA
+      name: addToMyFavorites
+      description: 'Lambda DataSource'
+      config:
+        lambdaFunctionArn:
+          "arn:aws:lambda:${self:provider.region}:${self:custom.awsAccountId}:function:${self:provider.stage}-lambda-add-to-my-favorites"
+    - type: AWS_LAMBDA
+      name: organisersByIds
+      description: 'Lambda DataSource'
+      config:
+        lambdaFunctionArn:
+          "arn:aws:lambda:${self:provider.region}:${self:custom.awsAccountId}:function:${self:provider.stage}-lambda-organisers-by-ids"
+    - type: AWS_LAMBDA
+      name: myFavoriteById
+      description: 'Lambda DataSource'
+      config:
+        lambdaFunctionArn:
+          "arn:aws:lambda:${self:provider.region}:${self:custom.awsAccountId}:function:${self:provider.stage}-lambda-my-favorite-by-id"
+    - type: AWS_LAMBDA
+      name: contactUs
+      description: 'Lambda DataSource'
+      config:
+        lambdaFunctionArn:
+          "arn:aws:lambda:${self:provider.region}:${self:custom.awsAccountId}:function:${self:provider.stage}-lambda-contact-us"
+    - type: AWS_LAMBDA
+      name: thingsToDoByIds
+      description: 'Lambda DataSource'
+      config:
+        lambdaFunctionArn:
+          "arn:aws:lambda:${self:provider.region}:${self:custom.awsAccountId}:function:${self:provider.stage}-lambda-things-todo-by-ids"
+    - type: AWS_LAMBDA
+      name: areMyFavoritesByIds
+      description: 'Lambda DataSource'
+      config:
+        lambdaFunctionArn:
+          "arn:aws:lambda:${self:provider.region}:${self:custom.awsAccountId}:function:${self:provider.stage}-lambda-are-favorites-by-ids"
+    - type: NONE
+      name: imageUri
+      description: 'Compute image URI'      
+  substitutions:
+    env: "${self:provider.stage}"
+    bucketUri: "${self:custom.assetsBucketUri}"

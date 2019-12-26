@@ -1,0 +1,18 @@
+$util.qr($ctx.stash.put("x-correlation-id", $ctx.request.headers['x-amzn-trace-id'].substring(16)))
+{
+    "version": "2017-02-28",
+    "operation": "PutItem",
+    "key": {
+        "id": { "S": "$ctx.identity.sub" },
+        "sk": { "S": "USR" }
+    },
+    "attributeValues": {
+        "name": { "S": "$ctx.args.input.name" },
+        "__context__": $util.dynamodb.toDynamoDBJson({
+            "x-correlation-id": "$ctx.stash['x-correlation-id']"
+        }),
+        "__event__": $util.dynamodb.toDynamoDBJson({
+            "type": "USR_SAVED"
+        })
+    }
+}

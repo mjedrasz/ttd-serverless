@@ -1,0 +1,28 @@
+---
+functions:
+  contactUs:
+    runtime: nodejs12.x
+    name: ${self:provider.stage}-lambda-contact-us
+    handler: contactUs/index.handler
+    description: Contact us
+    memorySize: 128 # optional, in MB, default is 1024
+    timeout: 10 # optional, default is 6
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - sqs:SendMessage
+          - sqs:GetQueueUrl
+        Resource:
+          - "arn:aws:sqs:${self:provider.region}:${self:custom.awsAccountId}:${self:custom.emailQueue}"   
+      - Effect: Allow
+        Action:
+          - cognito-idp:AdminGetUser
+        Resource: 
+          - "arn:aws:cognito-idp:${self:provider.region}:${self:custom.awsAccountId}:userpool/${self:custom.userPoolId}"            
+    environment:
+      SQS_REGION: ${self:provider.region}
+      COGNITO_REGION: ${self:provider.region}
+      USER_POOL_ID: ${self:custom.userPoolId}
+      EMAIL_QUEUE: ${self:custom.emailQueue}
+      CONTACT_US_RECIPIENTS: ${ssm:/${self:provider.stage}/lambda/contact-us/recipients}
+      TEMPLATE_NAME: contactUs

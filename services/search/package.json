@@ -1,0 +1,27 @@
+{
+  "name": "hopnamiasto-lambda-search",
+  "description": "",
+  "version": "0.1.0",
+  "scripts": {
+    "sls": "serverless",
+    "test": "serverless-bundle test"
+  },
+  "devDependencies": {
+    "axios": "^0.19.0",
+    "serverless": "^1.58.0",
+    "serverless-bundle": "^1.2.5",
+    "serverless-pseudo-parameters": "^2.5.0",
+    "serverless-iam-roles-per-function": "^2.0.2"
+  },
+  "dependencies": {
+    "@dazn/lambda-powertools-dynamodb-client": "^1.14.0",
+    "@dazn/lambda-powertools-lambda-client": "^1.15.2",
+    "@dazn/lambda-powertools-logger": "^1.15.2",
+    "@dazn/lambda-powertools-pattern-basic": "^1.15.2",
+    "aws-sdk": "^2.580.0",
+    "cron-parser": "^2.13.0",
+    "date-fns": "^2.8.1",
+    "elasticsearch": "^16.5.0",
+    "http-aws-es": "^6.0.0"
+  }
+}

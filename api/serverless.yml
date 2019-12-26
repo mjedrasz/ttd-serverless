@@ -1,0 +1,79 @@
+---
+service: graphql-api
+
+frameworkVersion: ">=1.21.0 <2.0.0"
+
+plugins:
+  - serverless-appsync-plugin
+  - serverless-pseudo-parameters
+provider:
+  name: aws
+  stage: "${opt:stage, env:SLS_STAGE, 'dev'}"
+  region: eu-central-1
+  runtime: python3.7
+
+custom:
+  awsAccountId: "#{AWS::AccountId}"
+  esEndpoint: ${ssm:/${self:provider.stage}/elasticsearch/endpoint}
+  esDomainName: ${ssm:/${self:provider.stage}/elasticsearch/domain}
+  oneTableName: ${self:provider.stage}-one-table
+  assetsBucketUri: https://${ssm:/${self:provider.stage}/route53/assets/name}"
+  appSync: 
+    - ${file(./guest/appsync.yml):appSync}
+    - ${file(./organiser/appsync.yml):appSync}  
+    - ${file(./user/appsync.yml):appSync} 
+    - ${file(./audit/appsync.yml):appSync} 
+  environments:
+    dev: Dev
+    test: Test
+    prod: Prod  
+resources:
+  - Resources:
+  - ${file(./common-resources.yml):resources} 
+  - ${file(./guest/resources.yml):resources} 
+  - ${file(./organiser/resources.yml):resources} 
+  - ${file(./user/resources.yml):resources} 
+  - Resources:
+      OrganiserGraphQLApiUrlParameter:
+        Type: "AWS::SSM::Parameter"
+        DependsOn: "${self:custom.environments.${self:provider.stage}}organiserapiGraphQlApi"
+        Properties:
+          Name: "/${self:provider.stage}/graphql-api/org/url"
+          Type: "String"
+          Value: { Fn::GetAtt: ["${self:custom.environments.${self:provider.stage}}organiserapiGraphQlApi", GraphQLUrl] }
+          Description: "Organiser GraphQL API URL."
+          Tags:
+            "env": ${self:provider.stage}     
+  - Resources:
+      UserGraphQLApiUrlParameter:
+        Type: "AWS::SSM::Parameter"
+        DependsOn: "${self:custom.environments.${self:provider.stage}}userapiGraphQlApi"
+        Properties:
+          Name: "/${self:provider.stage}/graphql-api/user/url"
+          Type: "String"
+          Value: { Fn::GetAtt: ["${self:custom.environments.${self:provider.stage}}userapiGraphQlApi", GraphQLUrl] }
+          Description: "User GraphQL API URL."
+          Tags:
+            "env": ${self:provider.stage}
+  - Resources:
+      AuditGraphQLApiUrlParameter:
+        Type: "AWS::SSM::Parameter"
+        DependsOn: "${self:custom.environments.${self:provider.stage}}auditapiGraphQlApi"
+        Properties:
+          Name: "/${self:provider.stage}/graphql-api/audit/url"
+          Type: "String"
+          Value: { Fn::GetAtt: ["${self:custom.environments.${self:provider.stage}}auditapiGraphQlApi", GraphQLUrl] }
+          Description: "Audit GraphQL API URL."
+          Tags:
+            "env": ${self:provider.stage}                        
+  - Resources:
+      GuestGraphQLApiUrlParameter:
+        Type: "AWS::SSM::Parameter"
+        DependsOn: "${self:custom.environments.${self:provider.stage}}guestapiGraphQlApi"
+        Properties:
+          Name: "/${self:provider.stage}/graphql-api/guest/url"
+          Type: "String"
+          Value: { Fn::GetAtt: ["${self:custom.environments.${self:provider.stage}}guestapiGraphQlApi", GraphQLUrl] }
+          Description: "Guest GraphQL API URL."
+          Tags:
+            "env": ${self:provider.stage}            

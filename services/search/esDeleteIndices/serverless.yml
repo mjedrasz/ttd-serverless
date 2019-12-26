@@ -1,0 +1,20 @@
+---
+functions:
+  esDeleteIndices:
+    runtime: nodejs12.x
+    name: ${self:provider.stage}-lambda-delete-es-indices
+    handler: esDeleteIndices/index.handler
+    description: Deletes ES indices
+    memorySize: 128 # optional, in MB, default is 1024
+    timeout: 10 # optional, default is 6
+    environment:
+      ES_INDICES: "${self:provider.stage}-things-todo"
+      ES_ENDPOINT: "https://${self:custom.esEndpoint}"
+      ES_REGION: ${self:provider.region}
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - es:*
+        Resource:
+          - "arn:aws:es:${self:provider.region}:${self:custom.awsAccountId}:domain/${self:custom.esDomainName}/*"
+          - "arn:aws:es:${self:provider.region}:${self:custom.awsAccountId}:domain/${self:custom.esDomainName}" 

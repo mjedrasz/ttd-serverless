@@ -1,0 +1,15 @@
+const DRAFT = 'DRAFT';
+const PENDING = 'PENDING';
+const PUBLISHED = 'PUBLISHED';
+const REJECTED = 'REJECTED';
+const DELETED = 'DELETED';
+const CANCELLED = 'CANCELLED';
+
+export {
+    DRAFT,
+    PENDING,
+    PUBLISHED,
+    REJECTED,
+    DELETED,
+    CANCELLED
+};

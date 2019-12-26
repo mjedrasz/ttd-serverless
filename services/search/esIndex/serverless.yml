@@ -1,0 +1,34 @@
+---
+functions:
+  indexThingsToDo:
+    runtime: nodejs12.x
+    name: ${self:provider.stage}-lambda-index-things-todo
+    handler: esIndex/index.handler
+    description: Allows Lambda functions to call AWS services on your behalf.
+    memorySize: 128 # optional, in MB, default is 1024
+    timeout: 10 # optional, default is 6
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:GetItem
+          - dynamodb:BatchGetItem
+        Resource:
+          - "arn:aws:dynamodb:${self:provider.region}:${self:custom.awsAccountId}:table/${self:custom.oneTableName}"   
+      - Effect: Allow
+        Action:
+          - es:*
+        Resource:
+          - "arn:aws:es:${self:provider.region}:${self:custom.awsAccountId}:domain/${self:custom.esDomainName}/*"
+          - "arn:aws:es:${self:provider.region}:${self:custom.awsAccountId}:domain/${self:custom.esDomainName}"        
+    environment:
+      ES_ENDPOINT: ${self:custom.esEndpoint}
+      ES_INDEX: ${self:custom.thingsToDoEsIndex}
+      ES_REGION: ${self:provider.region}
+      DYNAMODB_REGION: ${self:provider.region}
+      DYNAMODB_ONE_TABLE: ${self:custom.oneTableName}
+    events:
+      - sns:
+          arn: ${self:custom.fanoutTopicArn}
+          filterPolicy:
+            type:
+              - TTD_APPROVED

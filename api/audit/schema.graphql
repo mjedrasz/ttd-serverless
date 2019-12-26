@@ -1,0 +1,187 @@
+﻿type IntRange {
+	from: Int!
+	to: Int!
+}
+
+type Contact {
+	email: AWSEmail
+	phone: String
+	www: AWSURL
+}
+
+type Coordinates {
+	lat: Float!
+	lon: Float!
+}
+
+type DateTimeRange {
+	from: AWSDateTime!
+	to: AWSDateTime!
+}
+
+enum DayOfWeek {
+	MON
+	TUE
+	WED
+	THU
+	FRI
+	SAT
+	SUN
+}
+
+enum Category {
+	MUSIC
+	DANCE
+	ARTS
+	CRAFTS
+	SPORT
+	CULTURE
+	OUTDOOR
+	CINEMA
+	THEATER
+	PARTY
+	PERSONAL_DEVELOPMENT
+	OTHER
+}
+
+type FloatRange {
+	from: Float!
+	to: Float!
+}
+
+type ImageObject {
+	name: String!
+	bucket: String!
+	key: String!
+	region: String!
+}
+
+type Organiser {
+	id: ID!
+	name: String!
+}
+
+type PageInfo {
+	hasNextPage: Boolean!
+	hasPreviousPage: Boolean!
+	endCursor: String
+	startCursor: String
+}
+
+type Target {
+	age: IntRange!
+	type: [TargetType!]!
+}
+
+enum TargetType {
+	ADULT
+	CHILD
+	FAMILY
+}
+
+type ThingToDo {
+	id: ID!
+	type: ThingToDoType!
+	name: String!
+	description: String!
+	where: Where!
+	when: When!
+	contact: Contact!
+	target: Target!
+	image: ImageObject
+	imageUri: AWSURL
+	bookingMandatory: Boolean!
+	adultMandatory: Boolean!
+	category: ThingToDoCategory!
+	organiser: Organiser!
+	distance: Float
+}
+
+enum ThingToDoCategory {
+	MUSIC
+	DANCE
+	ARTS
+	CRAFTS
+	SPORT
+	OUTDOOR
+	CINEMA
+	THEATER
+	PARTY
+	PERSONAL_DEVELOPMENT
+	CAFE
+	RESTAURANT
+	PLAYROOM
+	ENTERTAINMENT
+	CULTURE
+	EDUCATION
+	OTHER
+}
+
+type ThingToDoConnection {
+	totalCount: Int
+	edges: [ThingToDoEdge!]!
+	pageInfo: PageInfo!
+}
+
+type ThingToDoEdge {
+	node: ThingToDo!
+	cursor: String
+}
+
+enum ThingToDoType {
+	EVENT
+	RECURRING_EVENT
+	PLACE
+}
+
+
+type TimeRange {
+	from: AWSTime!
+	to: AWSTime!
+}
+
+input TimeRangeInput {
+	from: AWSTime!
+	to: AWSTime!
+}
+
+type Occurence {
+	dayOfWeek: DayOfWeek!
+	hours: TimeRange!
+}
+
+type When {
+	date: DateTimeRange!
+	occurrences: [Occurence!]!
+}
+
+type Where {
+	location: Coordinates!
+	address: String!
+}
+
+
+input ApproveInput {
+	id: ID!
+}
+
+input RejectInput {
+	id: ID!
+}
+
+type Query {
+	# Pending thnigs todo
+    pending: ThingToDoConnection
+}
+
+type Mutation {
+    # Approve
+    approve(input: ApproveInput!): ThingToDo
+    # Reject
+    reject(input: RejectInput!): ThingToDo
+}
+
+schema {
+	query: Query
+	mutation: Mutation
+}

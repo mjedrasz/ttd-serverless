@@ -1,0 +1,47 @@
+---
+service: hopnamiasto-notification-service
+
+frameworkVersion: ">=1.21.0 <2.0.0"
+
+plugins:
+  - serverless-iam-roles-per-function
+  - serverless-bundle
+  - serverless-pseudo-parameters
+  - '@haftahave/serverless-ses-template'
+provider:
+  name: aws
+  stage: "${opt:stage, env:SLS_STAGE, 'dev'}"
+  region: eu-central-1
+  runtime: nodejs12.x
+  environment: 
+    LOG_LEVEL: ${self:custom.logLevel.${self:provider.stage}}
+    
+package:
+  individually: true
+  exclude:
+    - "**/**"
+
+custom:
+  awsAccountId: "#{AWS::AccountId}"
+  oneTableName: ${self:provider.stage}-one-table
+  emailQueue: ${self:provider.stage}-email-queue
+  fanoutTopicArn: ${ssm:/${self:provider.stage}/sns/topics/fanout/arn}
+  sesRegion: "${opt:ses-region, env:SLS_SES_REGION, 'eu-west-1'}"
+  pushMessageQueue: ${self:provider.stage}-push-message-queue
+  userPoolId: ${ssm:/${self:provider.stage}/cognito/user-pools/user/id}
+  sesTemplatesAddStageAlias: false                       
+  sesTemplatesConfigFile: './emailTemplates/index.js'
+  sesTemplatesRegion: 'eu-west-1'
+  logLevel:
+    dev: DEBUG
+    test: DEBUG
+    prod: INFO  
+
+functions:
+  - ${file(./contactUs/serverless.yml):functions}
+  - ${file(./notifyUs/serverless.yml):functions}
+  # - ${file(./savePushMessageToken/serverless.yml):functions}
+  - ${file(./sendEmail/serverless.yml):functions}
+  # - ${file(./sendPushMessage/serverless.yml):functions}
+  # - ${file(./sendPushMessageToUser/serverless.yml):functions}
+

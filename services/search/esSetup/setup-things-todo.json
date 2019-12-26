@@ -1,0 +1,110 @@
+{
+  "settings": {
+    "index.max_ngram_diff": 9,
+    "analysis": {
+      "analyzer": {
+        "ngram_analyzer": {
+          "tokenizer": "ngram_tokenizer",
+          "filter": [
+            "lowercase",
+            "asciifolding"
+          ]
+        },
+        "ngram_analyzer_search": {
+          "tokenizer": "lowercase",
+          "filter": ["asciifolding"]
+        }
+      },
+      "tokenizer": {
+        "ngram_tokenizer": {
+          "type": "ngram",
+          "min_gram": 3,
+          "max_gram": 12,
+          "token_chars": [
+            "letter",
+            "digit"
+          ]
+        }
+      }
+    }
+  },
+  "mappings": {
+ 
+      "properties": {
+        "category": {
+          "type": "keyword"
+        },
+        "id": {
+          "type": "keyword"
+        },
+        "sk": {
+          "type": "keyword"
+        },
+        "gsi1sk": {
+          "type": "keyword"
+        },
+        "orgId": {
+          "type": "keyword"
+        },
+        "target.type": {
+          "type": "keyword"
+        },
+        "type": {
+          "type": "keyword"
+        },
+        "where.location": {
+          "type": "geo_point"
+        },
+        "bookingMandatory": {
+          "type": "boolean"
+        },
+        "adultMandatory": {
+          "type": "boolean"
+        },
+        "price.from": {
+          "type": "float"
+        },
+        "price.to": {
+          "type": "float"
+        },
+        "name": {
+          "type": "text",
+          "fields": {
+            "ngram": {
+              "type": "text",
+              "analyzer": "ngram_analyzer",
+              "search_analyzer": "ngram_analyzer_search"
+            }
+          }
+        },
+        "description": {
+          "type": "text",
+          "fields": {
+            "ngram": {
+              "type": "text",
+              "analyzer": "ngram_analyzer",
+              "search_analyzer": "ngram_analyzer_search"
+            }
+          }
+        },
+        "__meta__.organiser": {
+          "type": "text",
+          "fields": {
+            "ngram": {
+              "type": "text",
+              "analyzer": "ngram_analyzer",
+              "search_analyzer": "ngram_analyzer_search"
+            }
+          }
+        },
+        "__meta__.when": {
+          "type": "nested",
+          "properties": {
+            "date": { "type": "date" },
+            "time.from": { "type": "date", "format": "time_no_millis" },
+            "time.to": { "type": "date", "format": "time_no_millis" }
+          }
+        }
+      }
+  }
+}

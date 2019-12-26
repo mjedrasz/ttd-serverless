@@ -1,0 +1,19 @@
+---
+functions:
+  rejectThingToDo:
+    runtime: nodejs12.x
+    name: ${self:provider.stage}-lambda-reject-thing-todo
+    handler: rejectThingToDo/index.handler
+    description: Reject a thing todo
+    memorySize: 192 # optional, in MB, default is 1024
+    timeout: 10 # optional, default is 6
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:UpdateItem
+          - dynamodb:GetItem
+        Resource:
+          - "arn:aws:dynamodb:${self:provider.region}:${self:custom.awsAccountId}:table/${self:custom.oneTableName}"    
+    environment:
+      DYNAMODB_REGION: ${self:provider.region}
+      DYNAMODB_ONE_TABLE: ${self:custom.oneTableName}

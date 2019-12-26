@@ -1,0 +1,464 @@
+$util.qr($ctx.stash.put("x-correlation-id", $ctx.request.headers['x-amzn-trace-id'].substring(16) ))
+{
+    "version": "2017-02-28",
+    "operation": "GET",
+    "path": "/test-things-todo/_search",
+    "params": {
+        "body": {
+             "_source": {
+                "excludes": [ "meta" ]
+            },
+            #if (!$util.isNull($ctx.args.first))
+                #set ($valid = $ctx.args.first > 0 && $ctx.args.first <= 500)
+                $util.validate($valid, "Page size needs to be in range (1, 500)")
+                #set ($size = $ctx.args.first + 1) ## a little hack to know if there is next
+            #elseif (!$util.isNull($ctx.args.last))
+                #set ($valid = $ctx.args.last > 0 && $ctx.args.last <= 500)
+                $util.validate($valid, "Page size needs to be in range (1, 500)")
+                #set ($size = $ctx.args.last + 1) ## a little hack to know if there is previous page
+            #else
+                #set ($size = 10 + 1)
+            #end
+            "size": $size,
+            #if (!$util.isNull($ctx.args.after))
+            #set ($sort = $util.base64Decode($ctx.args.after))
+            "search_after": $util.parseJson($sort),
+            #elseif (!$util.isNull($ctx.args.before))
+            #set ($sort = $util.base64Decode($ctx.args.before))
+            "search_after": $util.parseJson($sort),
+            #end
+            "query": {
+                "bool" : {
+                  "must" : [
+                     #if ($util.isNullOrBlank($ctx.args.search))
+                        {
+                            "match_all" : {}
+                        }
+                     #else
+                        {
+                        	"bool": {
+                            	"should": [
+                        			{
+                            			"multi_match": {
+                                			"query": "$ctx.args.search",
+                                			"fields": [
+                                    			"name^5",
+                                    			"name.ngram"
+                                			]
+                            		    }
+                                    },
+                                    {
+                                    	"multi_match": {
+                                            "query": "$ctx.args.search",
+                                            "fields": [
+                                                "description^3",
+                                                "description.ngram"
+                                            ]
+                                        }
+                                    },
+                                    {
+                                    	"multi_match": {
+                                            "query": "$ctx.args.search",
+                                            "fields": [
+                                                "__meta__.organiser^2",
+                                                "__meta__.organiser.ngram"
+                                            ]
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                     #end
+                  ]
+                  #if (!$util.isNull($ctx.args.filter))
+                      #set ($conditions = [])
+                      #if (!$util.isNull($ctx.args.filter.location))
+                      $util.qr($conditions.add("
+                      {
+                          ""geo_distance"" : {
+                              ""distance"" : ""$ctx.args.filter.location.radius"",
+                              ""where.location"" : {
+                                  ""lat"" : $ctx.args.filter.location.coordinates.lat,
+                                  ""lon"" : $ctx.args.filter.location.coordinates.lon
+                              }
+                          }
+                      }"))
+                      #end
+                      #if (!$util.isNull($ctx.args.filter.target) && !$util.isNull($ctx.args.filter.target.age))
+                      	#foreach ($age in $ctx.args.filter.target.age)
+                      	    $util.qr($conditions.add("
+                            {
+                            	""bool"":
+                            	{
+                                	""must"": [
+                      	    			{
+                            		  		""range"" : {
+                                 				""target.age.from"" : {
+                                		     		""lte"" : $age.from
+                              		    		}
+                              				}
+                      	    			},
+                      	    			{
+                       	    		  		""range"" : {
+                                  				""target.age.to"" : {
+                                      				""gte"" : $age.to
+                                  				}
+                              				}
+                      	    			}
+                                	]
+                                }
+                            }"))
+                      	#end
+                      #end
+                      #if (!$util.isNull($ctx.args.filter.price))
+                      $util.qr($conditions.add("
+                      {
+                          ""range"" : {
+                              ""price.from"" : {
+                                  ""gte"" : $ctx.args.filter.price.from,
+                                  ""lte"" : $ctx.args.filter.price.to
+                              }
+                          }
+                      }"))
+                      #end
+                      #if (!$util.isNull($ctx.args.filter.bookingMandatory))
+                      $util.qr($conditions.add("
+                      {
+                          ""term"" : { ""bookingMandatory"": $ctx.args.filter.bookingMandatory }
+                      }"))
+                      #end
+                      #if (!$util.isNull($ctx.args.filter.adultMandatory))
+                      $util.qr($conditions.add("
+                      {
+                          ""term"" : { ""adultMandatory"": $ctx.args.filter.adultMandatory }
+                      }"))
+                      #end
+                      #if (!$util.isNull($ctx.args.filter.category))
+                        #set ($orConditions = [])
+                        #foreach ($category in $ctx.args.filter.category)
+                      		$util.qr($orConditions.add("
+                      		{
+                      		    ""match"" : {
+                       		       ""category"" : ""$category""
+                        		}
+                      		}"))
+                      	#end
+                        $util.qr($conditions.add("
+                      		{
+                      		    ""bool"":
+                      		        {
+                      		            ""should"": [
+                      		                #foreach ($condition in $orConditions)
+                                                #if ($foreach.count > 1) , #end
+                                                $condition
+                                            #end
+                      		            ]
+                      		        }
+                      		}"))
+                      #end
+                      #if (!$util.isNull($ctx.args.filter.target) && !$util.isNull($ctx.args.filter.target.type))
+                        #set ($orConditions = [])
+                        #foreach ($type in $ctx.args.filter.target.type)
+                      		$util.qr($orConditions.add("
+                      		{
+                      		    ""match"" : {
+                       		       ""target.type"" : ""$type""
+                        		}
+                      		}"))
+                      	#end
+                        $util.qr($conditions.add("
+                      		{
+                      		    ""bool"":
+                      		        {
+                      		            ""should"": [
+                      		                #foreach ($condition in $orConditions)
+                                                #if ($foreach.count > 1) , #end
+                                                $condition
+                                            #end
+                      		            ]
+                      		        }
+                      		}"))
+                      #end
+                      #if (!$util.isNull($ctx.args.filter.type))
+                        #set ($orConditions = [])
+                        #foreach ($type in $ctx.args.filter.type)
+                      		$util.qr($orConditions.add("
+                      		{
+                      		    ""match"" : {
+                       		       ""type"" : ""$type""
+                        		}
+                      		}"))
+                      	#end
+                        $util.qr($conditions.add("
+                      		{
+                      		    ""bool"":
+                      		        {
+                      		            ""should"": [
+                      		                #foreach ($condition in $orConditions)
+                                                #if ($foreach.count > 1) , #end
+                                                $condition
+                                            #end
+                      		            ]
+                      		        }
+                      		}"))
+                      #end
+                      #if (!$util.isNull($ctx.args.filter.when))
+                        #if (!$util.isNull($ctx.args.filter.when.date))
+                            $util.qr($conditions.add("
+                                {
+                                    ""nested"": {
+                                        ""path"": ""__meta__.when"",
+                                        ""query"": {
+                                            ""bool"": {
+                                                ""must"": [
+
+                                                    {
+                                                        ""range"": {
+                                                            ""__meta__.when.date"": {
+                                                                ""gte"": ""$ctx.args.filter.when.date.from""
+                                                            }
+                                                        }
+                                                    },
+                                                    {
+                                                        ""range"": {
+                                                            ""__meta__.when.date"": {
+                                                                ""lte"": ""$ctx.args.filter.when.date.to""
+                                                            }
+                                                        }
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    }
+
+                                }
+                            "))
+                        #end
+                        #if (!$util.isNull($ctx.args.filter.when.time))
+                            $util.qr($conditions.add("
+                                {
+                                    ""nested"": {
+                                        ""path"": ""__meta__.when"",
+                                        ""query"": {
+                                            ""bool"": {
+                                                ""must"": [
+                                                    {
+                                                        ""range"": {
+                                                            ""__meta__.when.time.from"": {
+                                                                ""gte"": ""$ctx.args.filter.when.time.from""
+                                                            }
+                                                        }
+                                                    },
+                                                    {
+                                                        ""range"": {
+                                                            ""__meta__.when.time.to"": {
+                                                                ""lte"": ""$ctx.args.filter.when.time.to""
+                                                            }
+                                                        }
+                                                    }
+
+                                                ]
+                                            }
+                                        }
+                                    }
+
+                                }
+                            "))
+                        #end
+                      #end
+                      ,
+                      "filter" : {
+                        "bool" : {
+                            "must" : [
+                                #foreach ($condition in $conditions)
+                                    #if ($foreach.count > 1) , #end
+                                    $condition
+                                #end
+                            ],
+                        }
+                      }
+                  #end
+                }
+            },
+            #if(!$util.isNull($ctx.args.sort))
+            	#set ($sortBy = $ctx.args.sort.sortBy)
+            	#set ($sortDirection = $ctx.args.sort.direction)
+            	#if ($sortDirection == "DESC")
+            		#set($order = "desc")
+                	#set($oppositeOrder = "asc")
+            	#else
+            		#set($order = "asc")
+                	#set($oppositeOrder = "desc")
+            	#end
+            #else
+                #set ($sortBy = "RELEVANCE")
+            	#set ($sortDirection = "DESC")
+            	#set($order = "desc")
+                #set($oppositeOrder = "asc")
+            #end
+            #if ($sortBy == "RELEVANCE" || ($sortBy == "GEO_DISTANCE" && $util.isNull($ctx.args.location)))
+            	#if (!$util.isNull($ctx.args.after) || !$util.isNull($ctx.args.first))
+            		"sort": [
+                		{"_score": "$order"},
+                		{"_id": "asc"}
+                        #if (!$util.isNull($ctx.args.location))
+                        ,
+                        {
+            				"_geo_distance" : {
+               					"where.location" : {
+                    				"lat" : $ctx.args.location.lat,
+                    				"lon" : $ctx.args.location.lon
+                				},
+                				"order" : "asc",
+                				"unit" : "m"
+            				}
+        				}
+                        #end
+            		]
+            	#elseif (!$util.isNull($ctx.args.before) || !$util.isNull($ctx.args.last))
+            		"sort": [
+                		{"_score": "$oppositeOrder"},
+                		{"_id": "desc"}
+                        #if (!$util.isNull($ctx.args.location))
+                        ,
+                        {
+            				"_geo_distance" : {
+               					"where.location" : {
+                    				"lat" : $ctx.args.location.lat,
+                    				"lon" : $ctx.args.location.lon
+                				},
+                				"order" : "desc",
+                				"unit" : "m"
+            				}
+        				}
+                        #end
+            		]
+                #else
+            		"sort": [
+                		{"_score": "$order"},
+                		{"_id": "asc"}
+                        #if (!$util.isNull($ctx.args.location))
+                        ,
+                        {
+            				"_geo_distance" : {
+               					"where.location" : {
+                    				"lat" : $ctx.args.location.lat,
+                    				"lon" : $ctx.args.location.lon
+                				},
+                				"order" : "asc",
+                				"unit" : "m"
+            				}
+        				}
+                        #end
+            		]
+                #end
+            #elseif ($sortBy == "GEO_DISTANCE")
+            	#if (!$util.isNull($ctx.args.after) || !$util.isNull($ctx.args.first))
+            		"sort": [
+                        {
+            				"_geo_distance" : {
+               					"where.location" : {
+                    				"lat" : $ctx.args.location.lat,
+                    				"lon" : $ctx.args.location.lon
+                				},
+                				"order" : "$order",
+                				"unit" : "m"
+            				}
+        				},
+						{"_score": "desc"},
+                		{"_id": "asc"}
+            		]
+            	#elseif (!$util.isNull($ctx.args.before) || !$util.isNull($ctx.args.last))
+            		"sort": [
+                        {
+            				"_geo_distance" : {
+               					"where.location" : {
+                    				"lat" : $ctx.args.location.lat,
+                    				"lon" : $ctx.args.location.lon
+                				},
+                				"order" : "$order",
+                				"unit" : "m"
+            				}
+        				},
+                		{"_score": "asc"},
+                		{"_id": "desc"}
+            		]
+                #else
+            		"sort": [
+                        {
+            				"_geo_distance" : {
+               					"where.location" : {
+                    				"lat" : $ctx.args.location.lat,
+                    				"lon" : $ctx.args.location.lon
+                				},
+                				"order" : "$order",
+                				"unit" : "m"
+            				}
+        				},
+						{"_score": "desc"},
+                		{"_id": "asc"}
+            		]
+                #end
+            #else
+            	#if (!$util.isNull($ctx.args.after) || !$util.isNull($ctx.args.first))
+            		"sort": [
+                    	{"price.from": "$order"},
+                		{"_score": "desc"},
+                		{"_id": "asc"}
+                        #if (!$util.isNull($ctx.args.location))
+                        ,
+                        {
+            				"_geo_distance" : {
+               					"where.location" : {
+                    				"lat" : $ctx.args.location.lat,
+                    				"lon" : $ctx.args.location.lon
+                				},
+                				"order" : "asc",
+                				"unit" : "m"
+            				}
+        				}
+                        #end
+            		]
+            	#elseif (!$util.isNull($ctx.args.before) || !$util.isNull($ctx.args.last))
+            		"sort": [
+                    	{"price.from": "$oppositeOrder"},
+                		{"_score": "asc"},
+                		{"_id": "desc"}
+                        #if (!$util.isNull($ctx.args.location))
+                        ,
+                        {
+            				"_geo_distance" : {
+               					"where.location" : {
+                    				"lat" : $ctx.args.location.lat,
+                    				"lon" : $ctx.args.location.lon
+                				},
+                				"order" : "desc",
+                				"unit" : "m"
+            				}
+        				}
+                        #end
+            		]
+                #else
+            		"sort": [
+                    	{"price.from": "$order"},
+                		{"_score": "desc"},
+                		{"_id": "asc"}
+                        #if (!$util.isNull($ctx.args.location))
+                        ,
+                        {
+            				"_geo_distance" : {
+               					"where.location" : {
+                    				"lat" : $ctx.args.location.lat,
+                    				"lon" : $ctx.args.location.lon
+                				},
+                				"order" : "asc",
+                				"unit" : "m"
+            				}
+        				}
+                        #end
+            		]
+                #end
+            #end
+        }
+    }
+}

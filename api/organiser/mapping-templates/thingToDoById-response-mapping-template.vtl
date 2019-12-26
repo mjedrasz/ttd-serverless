@@ -1,0 +1,5 @@
+#if (!$util.isNull($ctx.result) && $ctx.result.orgId == $ctx.identity.sub)
+    $util.toJson($ctx.result)
+#else
+    null
+#end

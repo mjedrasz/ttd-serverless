@@ -1,0 +1,344 @@
+﻿
+input IntRangeInput {
+	from: Int!
+	to: Int!
+}
+
+type IntRange {
+	from: Int!
+	to: Int!
+}
+
+type Contact {
+	email: AWSEmail
+	phone: String
+	www: AWSURL
+}
+
+type Coordinates {
+	lat: Float!
+	lon: Float!
+}
+
+type DateTimeRange {
+	from: AWSDateTime!
+	to: AWSDateTime!
+}
+
+input DateTimeRangeInput {
+	from: AWSDateTime!
+	to: AWSDateTime!
+}
+
+enum DayOfWeek {
+	MON
+	TUE
+	WED
+	THU
+	FRI
+	SAT
+	SUN
+}
+
+enum Category {
+	MUSIC
+	DANCE
+	ARTS
+	CRAFTS
+	SPORT
+	CULTURE
+	OUTDOOR
+	CINEMA
+	THEATER
+	PARTY
+	PERSONAL_DEVELOPMENT
+	OTHER
+}
+
+type FloatRange {
+	from: Float!
+	to: Float!
+}
+
+input FloatRangeInput {
+	from: Float!
+	to: Float!
+}
+
+type Organiser {
+	id: ID!
+	name: String!
+}
+
+type PageInfo {
+	hasNextPage: Boolean!
+	hasPreviousPage: Boolean!
+	endCursor: String
+	startCursor: String
+}
+
+input ContactUsInput {
+    subject: String!
+    body: String!
+    from: String!
+}
+
+input Sort {
+	sortBy: SortBy!
+	direction: SortDirection!
+}
+
+enum SortBy {
+	RELEVANCE
+	GEO_DISTANCE
+	PRICE
+}
+
+enum SortDirection {
+	ASC
+	DESC
+}
+
+type Target {
+	age: IntRange!
+	type: [TargetType!]!
+}
+
+input TargetInput {
+	age: IntRangeInput!
+	type: [TargetType!]!
+}
+
+enum TargetType {
+	ADULT
+	CHILD
+	FAMILY
+}
+
+type ThingToDo {
+	id: ID!
+	type: ThingToDoType!
+	name: String!
+	description: String!
+	where: Where!
+	when: When!
+	contact: Contact!
+	target: Target!
+	image: ImageObject
+	bookingMandatory: Boolean!
+	adultMandatory: Boolean!
+	category: ThingToDoCategory!
+	price: FloatRange!
+	organiser: Organiser!
+	myFavorite: Boolean!
+	distance: Float
+}
+
+enum ThingToDoCategory {
+	MUSIC
+	DANCE
+	ARTS
+	CRAFTS
+	SPORT
+	OUTDOOR
+	CINEMA
+	THEATER
+	PARTY
+	PERSONAL_DEVELOPMENT
+	CAFE
+	RESTAURANT
+	PLAYROOM
+	ENTERTAINMENT
+	CULTURE
+	EDUCATION
+	OTHER
+}
+
+type ThingToDoConnection {
+	totalCount: Int
+	edges: [ThingToDoEdge!]!
+	pageInfo: PageInfo!
+}
+
+type ThingToDoEdge {
+	node: ThingToDo!
+	cursor: String
+}
+
+enum ThingToDoType {
+	EVENT
+	RECURRING_EVENT
+	PLACE
+}
+
+type TimeRange {
+	from: AWSTime!
+	to: AWSTime!
+}
+
+input TimeRangeInput {
+	from: AWSTime!
+	to: AWSTime!
+}
+
+type Occurence {
+	dayOfWeek: DayOfWeek!
+	hours: TimeRange!
+}
+
+input OccurenceInput {
+	dayOfWeek: DayOfWeek!
+	hours: TimeRangeInput!
+}
+
+type When {
+	dateTime: DateTimeRange!
+	occurrences: [Occurence!]!
+}
+
+input WhenInput {
+	dateTime: DateTimeRangeInput!
+	occurrences: [OccurenceInput!]!
+}
+
+type Where {
+	location: Coordinates!
+	address: String!
+}
+
+type DateRange {
+	from: AWSDate!
+	to: AWSDate!
+}
+
+input DateRangeInput {
+	from: AWSDate!
+	to: AWSDate!
+}
+
+input FindThingsToDoFilterInput {
+	location: LocationFilterInput
+	target: TargetFilterInput
+	price: FloatRangeInput
+	type: [ThingToDoType!]
+	category: [ThingToDoCategory!]
+	when: WhenFilterInput
+	bookingMandatory: Boolean
+	adultMandatory: Boolean
+}
+
+type ImageObject {
+  name: String!
+  imageUri: String!
+}
+
+input LocationFilterInput {
+	coordinates: LocationInput!
+	radius: Int!
+}
+
+input LocationInput {
+	lat: Float!
+	lon: Float!
+}
+
+input TargetFilterInput {
+	age: [IntRangeInput!]
+	type: [TargetType!]
+}
+
+input WhenFilterInput {
+	date: DateRangeInput
+	time: TimeRangeInput
+}
+
+input AddToMyFavoritesInput {
+	id: ID!
+}
+
+type Child {
+    id: ID!
+	name: String!
+	birthDate: AWSDate!
+}
+
+input AddChildInput {
+	name: String!
+	birthDate: AWSDate!
+}
+
+input UpdateChildInput {
+	id: ID!,
+	child: AddChildInput!
+}
+
+input RemoveChildInput {
+	id: ID!
+}
+
+enum Gender {
+	MALE
+	FEMALE
+}
+
+type Mutation {
+	# Add to favorites
+	addToMyFavorites(input: AddToMyFavoritesInput!): MyFavorite
+    # Contact us
+    contactUs(input: ContactUsInput!): Boolean
+    # Add child
+    addChild(input: AddChildInput!): Child
+    # Update child
+    updateChild(input: UpdateChildInput!): Child
+}
+
+type MyFavorite {
+    id: ID!
+    thingToDo: ThingToDo!
+}
+
+type MyFavoriteConnection {
+	totalCount: Int
+	edges: [MyFavoriteEdge!]!
+	pageInfo: PageInfo!
+}
+
+type MyFavoriteEdge {
+	node: MyFavorite!
+	cursor: String
+}
+
+type Query {
+	thingToDoById(id: ID!): ThingToDo
+	# Find things to do
+	findThingsToDo(
+		first: Int,
+		after: String,
+		last: Int,
+		before: String,
+		search: String,
+		filter: FindThingsToDoFilterInput,
+		sort: Sort,
+		location: LocationInput
+	): ThingToDoConnection
+
+	myFavorites(
+		first: Int,
+		after: String
+	): MyFavoriteConnection
+
+	myFavoriteById(id: ID!): MyFavorite
+
+    myChildren: [Child!]
+
+    myChildById(id: ID!): Child
+}
+
+input RemoveFromMyFavoritesInput {
+	id: ID!
+}
+
+schema {
+	query: Query
+	mutation: Mutation
+}

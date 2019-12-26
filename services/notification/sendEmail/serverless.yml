@@ -1,0 +1,25 @@
+---
+functions:
+  sendEmail:
+    runtime: nodejs12.x
+    name: ${self:provider.stage}-lambda-send-email
+    handler: sendEmail/index.handler
+    description: Send Email
+    memorySize: 128 # optional, in MB, default is 1024
+    timeout: 10 # optional, default is 6
+    environment:
+      EMAIL_SOURCE: 'mrk.waw.81@gmail.com'
+      SES_REGION: ${self:custom.sesRegion}
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - sqs:ReceiveMessage
+          - sqs:DeleteMessage
+          - sqs:GetQueueAttributes
+        Resource: "arn:aws:sqs:${self:provider.region}:${self:custom.awsAccountId}:${self:custom.emailQueue}"
+      - Effect: Allow
+        Action:
+          - ses:SendTemplatedEmail
+        Resource: 'arn:aws:ses:${self:custom.sesRegion}:${self:custom.awsAccountId}:identity/*'    
+    events:
+    - sqs: 'arn:aws:sqs:${self:provider.region}:${self:custom.awsAccountId}:${self:custom.emailQueue}'

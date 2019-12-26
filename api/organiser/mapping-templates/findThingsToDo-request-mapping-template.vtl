@@ -1,0 +1,97 @@
+$util.qr($ctx.stash.put("x-correlation-id", $ctx.request.headers['x-amzn-trace-id'].substring(16) ))
+{
+    "version": "2017-02-28",
+    "operation": "GET",
+    "path": "/${env}-things-todo/_search",
+    "params": {
+        "body": {
+            #if (!$util.isNull($ctx.args.first))
+                #set ($valid = $ctx.args.first > 0 && $ctx.args.first <= 20)
+                $util.validate($valid, "Page size needs to be in range (1, 20)")
+                #set ($size = $ctx.args.first + 1) ## a little hack to know if there is next
+            #elseif (!$util.isNull($ctx.args.last))
+                #set ($valid = $ctx.args.last > 0 && $ctx.args.last <= 20)
+                $util.validate($valid, "Page size needs to be in range (1, 20)")
+                #set ($size = $ctx.args.last + 1) ## a little hack to know if there is previous page
+            #else
+                #set ($size = 10 + 1)
+            #end
+            "size": $size,
+            #if (!$util.isNull($ctx.args.after))
+            #set ($sort = $util.base64Decode($ctx.args.after))
+            "search_after": $util.parseJson($sort),
+            #elseif (!$util.isNull($ctx.args.before))
+            #set ($sort = $util.base64Decode($ctx.args.before))
+            "search_after": $util.parseJson($sort),
+            #end
+            "query": {
+                "bool" : {
+                  "must" : [
+                     #if ($util.isNullOrBlank($ctx.args.search))
+                        {
+                            "match_all" : {}
+                        }
+                     #else
+                        {
+                        	"bool": {
+                            	"should": [
+                        			{
+                            			"multi_match": {
+                                			"query": "$ctx.args.search",
+                                			"fields": [
+                                    			"name^5",
+                                    			"name.ngram"
+                                			]
+                            		    }
+                                    },
+                                    {
+                                    	"multi_match": {
+                                            "query": "$ctx.args.search",
+                                            "fields": [
+                                                "description^3",
+                                                "description.ngram"
+                                            ]
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                     #end
+                  ]
+                }
+            },
+            #if(!$util.isNull($ctx.args.sort))
+            	#set($sortBy = $ctx.args.sort.sortBy)
+            	#set($sortDirection = $ctx.args.sort.direction)
+            	#if ($sortDirection == "DESC")
+            		#set($order = "desc")
+                #set($oppositeOrder = "asc")
+            	#else
+            		#set($order = "asc")
+                #set($oppositeOrder = "desc")
+            	#end
+            #else
+                #set($sortBy = "RELEVANCE")
+            	  #set($sortDirection = "DESC")
+            	  #set($order = "desc")
+                #set($oppositeOrder = "asc")
+            #end
+            #if (!$util.isNull($ctx.args.after) || !$util.isNull($ctx.args.first))
+            "sort": [
+              		{"_score": "$order"},
+              		{"_id": "asc"}
+            ]
+            #elseif (!$util.isNull($ctx.args.before) || !$util.isNull($ctx.args.last))
+            "sort": [
+              		{"_score": "$oppositeOrder"},
+              		{"_id": "desc"}
+            ]
+            #else
+            "sort": [
+              		{"_score": "$order"},
+              		{"_id": "asc"}
+            ]
+            #end
+        }
+    }
+}

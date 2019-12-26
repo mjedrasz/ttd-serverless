@@ -1,0 +1,67 @@
+{
+    "name": "testplace",
+    "description": "desc",
+    "where": {
+        "name": "where name",
+        "location": {
+            "lat": 21,
+            "lon": 55
+        },
+        "address": {
+            "city": "w-wa",
+            "street": "prosta 11",
+            "zipCode": "00-222"
+        }
+    },
+    "contact": {
+        "email": "aaa@onet.pl",
+        "phone": "434422333",
+        "www": "https://example.com"
+    },
+    "target": {
+        "age": {
+            "from": 3,
+            "to": 23
+        },
+        "type": [
+            "CHILD"
+        ]
+    },
+    "bookingMandatory": false,
+    "adultMandatory": false,
+    "category": "RESTAURANT",
+    "schedule": {
+        "when": {
+            "date": {
+                "from": "2019-12-01",
+                "to": "2019-12-31"
+            },
+            "time": {
+                "from": "10:00:00Z",
+                "to": "12:00:00Z"
+            }
+        },
+        "times": [
+            {
+                "dayOfWeek": "MON",
+                "hours": {
+                    "from": "10:00:00Z",
+                    "to": "12:00:00Z"
+                }
+            },
+            {
+                "dayOfWeek": "TUE",
+                "hours": {
+                    "from": "14:00:00Z",
+                    "to": "18:00:00Z"
+                }
+            }
+        ]
+    },
+    "id": "72d610b6-f787-51e0-b762-a9e1a105d299",
+    "sk": "TTD",
+    "orgId": "a5f3d21b-dd19-4c66-9e00-18e2b9f1380d",
+    "gsi1sk": "DRAFT#a5f3d21b-dd19-4c66-9e00-18e2b9f1380d",
+    "status": "DRAFT",
+    "__typename": "Place"
+}

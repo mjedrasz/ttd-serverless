@@ -1,0 +1,12 @@
+$util.qr($ctx.stash.put("x-correlation-id", $ctx.request.headers['x-amzn-trace-id'].substring(16)))
+{
+    "version": "2017-02-28",
+    "operation": "Query",
+    "query" : {
+      "expression": "sk = :sk",
+        "expressionValues" : {
+          ":sk" : { "S" : "CHL#$ctx.identity.sub" }
+        }
+    },
+    "index": "gsi-1",
+}

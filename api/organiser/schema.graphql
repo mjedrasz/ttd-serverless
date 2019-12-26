@@ -1,0 +1,320 @@
+﻿input IntRangeInput {
+	from: Int!
+	to: Int!
+}
+
+type IntRange {
+	from: Int!
+	to: Int!
+}
+
+type Contact {
+	email: AWSEmail
+	phone: String
+	www: AWSURL
+}
+
+input ContactInput {
+	email: AWSEmail
+	phone: String
+	www: AWSURL
+}
+
+type Coordinates {
+	lat: Float!
+	lon: Float!
+}
+
+input CoordinatesInput {
+	lat: Float!
+	lon: Float!
+}
+
+input ThingToDoInput {
+	name: String!
+	type: ThingToDoType!
+	description: String!
+	where: WhereInput!
+	when: WhenInput!
+	contact: ContactInput!
+	target: TargetInput!
+	image: ImageObjectInput
+	bookingMandatory: Boolean!
+	adultMandatory: Boolean!
+	category: Category!
+	price: FloatRangeInput!
+}
+
+type DateTimeRange {
+	from: AWSDateTime!
+	to: AWSDateTime!
+}
+
+input DateTimeRangeInput {
+	from: AWSDateTime!
+	to: AWSDateTime!
+}
+
+enum DayOfWeek {
+	MON
+	TUE
+	WED
+	THU
+	FRI
+	SAT
+	SUN
+}
+
+enum Category {
+	MUSIC
+	DANCE
+	ARTS
+	CRAFTS
+	SPORT
+	CULTURE
+	OUTDOOR
+	CINEMA
+	THEATER
+	PARTY
+	PERSONAL_DEVELOPMENT
+	OTHER
+}
+
+type FloatRange {
+	from: Float!
+	to: Float!
+}
+
+input FloatRangeInput {
+	from: Float!
+	to: Float!
+}
+
+type ImageObject {
+	name: String!
+	bucket: String!
+	key: String!
+	region: String!
+	imageUri: AWSURL!
+}
+
+input ImageObjectInput {
+	name: String!
+	bucket: String!
+	key: String!
+	region: String!
+	mimeType: String
+}
+
+input RemoveThingToDoInput {
+    id: ID!
+}
+
+type Mutation {
+	# Create a single event.
+	createThingToDo(input: ThingToDoInput!): ThingToDo
+	# Update a single event.
+	updateThingToDo(input: UpdateThingToDoInput!): ThingToDo
+    # Contact us
+    contactUs(input: ContactUsInput!): Boolean
+    # Publish
+    publish(input: PublishInput!): ThingToDo
+    # New version
+    newVersion(input: NewVersionInput!): ThingToDo
+    # Remove thing todo
+    removeThingToDo(input: RemoveThingToDoInput!): ThingToDo
+	# update profile
+	saveProfile(input: SaveProfileInput!): Organiser
+}
+
+type Organiser {
+	id: ID!
+	name: String!
+}
+
+input SaveProfileInput {
+	name: String!
+}
+
+type PageInfo {
+	hasNextPage: Boolean!
+	hasPreviousPage: Boolean!
+	endCursor: String
+	startCursor: String
+}
+
+input PublishInput {
+	id: ID!
+}
+
+input NewVersionInput {
+	id: ID!
+}
+
+type Query {
+	# Get a single event by id.
+	thingToDoById(id: ID!): ThingToDo
+	# things to do
+    thingsToDo(
+		first: Int,
+		after: String,
+		last: Int,
+		before: String,
+		search: String,
+		sort: Sort
+	): ThingToDoConnection
+
+	profile: Organiser
+
+    thingsToDoByStatus(first: Int, after: String, status: ThingToDoStatus!): ThingToDoConnection
+
+}
+
+input ContactUsInput {
+    subject: String!
+    body: String!
+    from: String!
+}
+
+input Sort {
+	sortBy: SortBy!
+	direction: SortDirection!
+}
+
+enum SortBy {
+	RELEVANCE
+	GEO_DISTANCE
+	PRICE
+}
+
+enum SortDirection {
+	ASC
+	DESC
+}
+
+type Target {
+	age: IntRange!
+	type: [TargetType!]!
+}
+
+input TargetInput {
+	age: IntRangeInput!
+	type: [TargetType!]!
+}
+
+enum TargetType {
+	ADULT
+	CHILD
+	FAMILY
+}
+
+type ThingToDo {
+	id: ID!
+	type: ThingToDoType!
+	name: String!
+	description: String!
+	where: Where!
+	when: When!
+	contact: Contact!
+	target: Target!
+	image: ImageObject
+	bookingMandatory: Boolean!
+	adultMandatory: Boolean!
+	category: ThingToDoCategory!
+	price: FloatRange!
+	distance: Float
+}
+
+enum ThingToDoCategory {
+	MUSIC
+	DANCE
+	ARTS
+	CRAFTS
+	SPORT
+	OUTDOOR
+	CINEMA
+	THEATER
+	PARTY
+	PERSONAL_DEVELOPMENT
+	CAFE
+	RESTAURANT
+	PLAYROOM
+	ENTERTAINMENT
+	CULTURE
+	EDUCATION
+	OTHER
+}
+
+type ThingToDoConnection {
+	totalCount: Int
+	edges: [ThingToDoEdge!]!
+	pageInfo: PageInfo!
+}
+
+type ThingToDoEdge {
+	node: ThingToDo!
+	cursor: String
+}
+
+enum ThingToDoType {
+	EVENT
+	RECURRING_EVENT
+	PLACE
+}
+
+enum ThingToDoStatus {
+	DRAFT
+	PENDING
+	PUBLISHED
+	REJECTED
+}
+
+type TimeRange {
+	from: AWSTime!
+	to: AWSTime!
+}
+
+input TimeRangeInput {
+	from: AWSTime!
+	to: AWSTime!
+}
+
+input UpdateThingToDoInput {
+	id: ID!
+	thingToDo: ThingToDoInput!
+}
+
+type Occurence {
+	dayOfWeek: DayOfWeek!
+	hours: TimeRange!
+}
+
+input OccurenceInput {
+	dayOfWeek: DayOfWeek!
+	hours: TimeRangeInput!
+}
+
+type When {
+	dateTime: DateTimeRange!
+	occurrences: [Occurence!]!
+}
+
+input WhenInput {
+	dateTime: DateTimeRangeInput!
+	occurrences: [OccurenceInput!]!
+}
+
+type Where {
+	location: Coordinates!
+	address: String!
+}
+
+input WhereInput {
+	location: CoordinatesInput!
+	address: String!
+}
+
+schema {
+	query: Query
+	mutation: Mutation
+}

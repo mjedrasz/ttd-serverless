@@ -1,0 +1,35 @@
+---
+service: hopnamiasto-fanout-service
+
+frameworkVersion: ">=1.21.0 <2.0.0"
+
+plugins:
+  - serverless-iam-roles-per-function
+  - serverless-bundle
+  - serverless-pseudo-parameters
+provider:
+  name: aws
+  stage: "${opt:stage, env:SLS_STAGE, 'dev'}"
+  region: eu-central-1
+  runtime: nodejs12.x
+  environment: 
+    LOG_LEVEL: ${self:custom.logLevel.${self:provider.stage}}
+    
+package:
+  individually: true
+  exclude:
+    - "**/**"
+
+custom:
+  awsAccountId: "#{AWS::AccountId}"
+  oneTableName: ${self:provider.stage}-one-table
+  oneTableStreamArn: ${ssm:/${self:provider.stage}/dynamodb/streams/${self:provider.stage}-one-table}
+  fanoutTopicArn: ${ssm:/${self:provider.stage}/sns/topics/fanout/arn}
+  logLevel:
+    dev: DEBUG
+    test: DEBUG
+    prod: INFO  
+
+functions:
+  - ${file(./fanout/serverless.yml):functions}
+

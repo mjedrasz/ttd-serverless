@@ -1,0 +1,40 @@
+---
+service: hopnamiasto-search-service
+
+frameworkVersion: ">=1.21.0 <2.0.0"
+
+plugins:
+  - serverless-iam-roles-per-function
+  - serverless-pseudo-parameters
+  - serverless-bundle
+provider:
+  name: aws
+  stage: "${opt:stage, env:SLS_STAGE, 'dev'}"
+  region: eu-central-1
+  runtime: nodejs12.x
+  environment: 
+    LOG_LEVEL: ${self:custom.logLevel.${self:provider.stage}}
+
+package:
+  individually: true
+  exclude:
+    - "**/**"
+
+custom:
+  awsAccountId: "#{AWS::AccountId}"
+  oneTableName: ${self:provider.stage}-one-table
+  esEndpoint: ${ssm:/${self:provider.stage}/elasticsearch/endpoint}
+  esDomainName: ${ssm:/${self:provider.stage}/elasticsearch/domain}
+  thingsToDoEsIndex: ${self:provider.stage}-things-todo
+  fanoutTopicArn: ${ssm:/${self:provider.stage}/sns/topics/fanout/arn}
+  logLevel:
+    dev: DEBUG
+    test: DEBUG
+    prod: INFO 
+      
+functions:
+  - ${file(./esDeleteIndices/serverless.yml):functions}
+  - ${file(./esIndex/serverless.yml):functions}
+  - ${file(./esSetup/serverless.yml):functions}
+  - ${file(./esReindex/serverless.yml):functions}
+

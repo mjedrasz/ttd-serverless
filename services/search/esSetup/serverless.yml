@@ -1,0 +1,21 @@
+---
+functions:
+  esThingsToDoSetup:
+    runtime: nodejs12.x
+    name: ${self:provider.stage}-lambda-es-setup-things-todo-index
+    handler: esSetup/index.handler
+    description: Creates geo mapping in Elasticsearch
+    memorySize: 128 # optional, in MB, default is 1024
+    timeout: 10 # optional, default is 6
+    environment:
+      ES_ENDPOINT: "https://${self:custom.esEndpoint}"
+      ES_INDEX: ${self:custom.thingsToDoEsIndex}
+      ES_SETUP_FILE: setup-things-todo.json
+      ES_REGION: ${self:provider.region}
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - es:*
+        Resource:
+          - "arn:aws:es:${self:provider.region}:${self:custom.awsAccountId}:domain/${self:custom.esDomainName}/*"
+          - "arn:aws:es:${self:provider.region}:${self:custom.awsAccountId}:domain/${self:custom.esDomainName}" 

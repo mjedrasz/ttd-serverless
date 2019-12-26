@@ -1,0 +1,37 @@
+---
+service: hopnamiasto-content-service
+
+frameworkVersion: ">=1.21.0 <2.0.0"
+
+plugins:
+  - serverless-iam-roles-per-function
+  - serverless-pseudo-parameters
+  - serverless-bundle
+provider:
+  name: aws
+  stage: "${opt:stage, env:SLS_STAGE, 'dev'}"
+  region: eu-central-1
+  runtime: nodejs12.x
+  environment: 
+    LOG_LEVEL: ${self:custom.logLevel.${self:provider.stage}}
+
+package:
+  individually: true
+  exclude:
+    - "**/**"
+
+custom:
+  awsAccountId: "#{AWS::AccountId}"
+  oneTableName: ${self:provider.stage}-one-table
+  logLevel:
+    dev: DEBUG
+    test: DEBUG
+    prod: INFO  
+
+functions:
+  - ${file(./createThingToDo/serverless.yml):functions}
+  - ${file(./newVersion/serverless.yml):functions}
+  - ${file(./organisersByIds/serverless.yml):functions}
+  - ${file(./publishThingToDo/serverless.yml):functions}
+  - ${file(./thingsToDoByIds/serverless.yml):functions}  
+  - ${file(./updateThingToDo/serverless.yml):functions}        

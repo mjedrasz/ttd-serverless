@@ -1,0 +1,9 @@
+$util.qr($ctx.stash.put("x-correlation-id", $ctx.request.headers['x-amzn-trace-id'].substring(16)))
+{
+    "version": "2017-02-28",
+    "operation": "GetItem",
+    "key": {
+        "id": { "S": "$ctx.args.id" },
+        "sk": { "S": "CHL#$ctx.identity.sub" }
+    }
+}

@@ -1,0 +1,27 @@
+resources:
+  Resources:
+    AppSyncLoggingServiceRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: ${self:provider.stage}-appsync-log-role
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+              - "appsync.amazonaws.com"
+            Action:
+            - "sts:AssumeRole"
+        Policies:
+        - PolicyName: log-policy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+            - Effect: Allow
+              Action:
+              - logs:CreateLogGroup
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+              Resource:
+              - 'arn:aws:logs:${self:provider.region}:${self:custom.awsAccountId}:log-group:/aws/appsync/*:*:*'

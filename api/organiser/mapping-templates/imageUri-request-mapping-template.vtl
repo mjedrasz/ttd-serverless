@@ -1,0 +1,7 @@
+$util.qr($ctx.stash.put("x-correlation-id", $ctx.request.headers['x-amzn-trace-id'].substring(16)))
+{
+    "version": "2017-02-28",
+    "payload": {
+    	"key": "$util.urlEncode($ctx.source.key)"
+    }
+}

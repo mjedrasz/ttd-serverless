@@ -1,0 +1,44 @@
+query find {
+  findThingsToDo(filter: {
+    when: {
+      date: {
+        from: "2019-12-10"
+        to: "2019-12-26"
+      }
+      time: {
+        from: "04:00:00Z"
+        to: "07:00:00Z"
+      }
+    }
+  }) {
+    edges {
+      node {
+        id
+        name
+        description
+        when {
+          dateTime {
+            from
+            to
+          
+          }
+          occurrences {
+            dayOfWeek
+            hours {
+              from
+              to
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+mutation contact {
+  contactUs(input: {
+    subject: "ddd"
+    body: "fsfddsa"
+    from: "me"
+  })
+}

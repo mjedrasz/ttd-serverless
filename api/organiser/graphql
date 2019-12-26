@@ -1,0 +1,340 @@
+query drafts {
+  thingsToDoByStatus(status: DRAFT) {
+    totalCount
+    edges {
+      node {
+        id
+        type
+        name
+      }
+    }
+  }
+}
+query rejected {
+  thingsToDoByStatus(status: REJECTED) {
+    totalCount
+    edges {
+      node {
+        id
+        name
+      }
+    }
+   
+  }
+}
+query pending {
+  thingsToDoByStatus(status: PENDING, first: 2
+  ) {
+    totalCount
+    edges {
+      cursor
+      node {
+        id
+        name
+      }
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+      startCursor
+    }
+  }
+}
+
+query published {
+  thingsToDoByStatus(status: PUBLISHED, 
+  ) {
+    totalCount
+    edges {
+      cursor
+      node {
+        id
+        name
+      }
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+      startCursor
+    }
+  }
+}
+query thingTodoById {
+  thingToDoById(id: "0009e30d-b1fa-5efe-9e22-bffbd9d626c7") {
+    id
+    name
+    type
+  }
+}
+query findThingsToDo {
+  thingsToDo(search: "teddddddst") {
+    totalCount
+    edges {
+      node {
+        id
+        image {
+        	imageUri
+        }
+      }
+    }
+  }
+}
+
+query profile {
+  profile {
+    name
+  }
+}
+
+mutation contactUs {
+  contactUs(input: {
+    subject: "my subject32"
+  	body: "mmmody"
+    from: "me"
+  }) 
+}
+
+mutation saveProfile {
+  saveProfile(input: {
+    name: "maro2"
+  }) {
+    id
+    name
+  }
+}
+
+mutation remove {
+  removeThingToDo(input: {
+    id: "c17cfcdf-06b2-5406-b2fc-68f7993f5802"
+  }) {
+    id
+  }
+}
+mutation publish {
+  p1: publish(input: {
+    id: "c77c8c67-78bd-5001-8ce4-b57151f9cc3f"
+  }) {
+    id
+    name
+  }
+  p2: publish(input: {
+    id: "23208820-0555-5d1c-94ea-16aed6248cb2"
+  }) {
+    id
+    name
+  }
+}
+# 
+mutation newVersion {
+  newVersion(input: {
+    id: "6ff8f8e9-3aa4-5921-be3d-5073d7578389"
+    
+  }) {
+    id
+    name
+  }
+}
+mutation createThingToDo {
+  createThingToDo(input:{
+    name: "test"
+    description: "desc"
+    where: {
+      address: "where name"
+      location: {
+        lat: 21
+        lon: 55
+     }
+    }
+    contact: {
+      email: "aaa@onet.pl"
+      phone: "434422333"
+      www: "https://example.com"
+    }
+    target: {
+      age: {
+        from: 3
+        to: 23
+      }
+      type: [CHILD]
+    }
+    type: EVENT
+    bookingMandatory: false
+    adultMandatory: false
+    category: MUSIC
+    price: {
+      from: 10.30
+      to: 103.42
+    }
+    when: {
+      
+        dateTime: {
+          from: "2019-12-01T10:00:00Z"
+          to: "2019-12-31T12:00:00Z"
+        }
+        occurrences: [
+      ]
+    }
+  }) {
+    id
+  }
+  }
+
+mutation createRecurringThingToDo {
+  createThingToDo(input:{
+    name: "test"
+    description: "desc"
+    where: {
+      address: "where name"
+      location: {
+        lat: 21
+        lon: 55
+     }
+    }
+    contact: {
+      email: "aaa@onet.pl"
+      phone: "434422333"
+      www: "https://example.com"
+    }
+    target: {
+      age: {
+        from: 3
+        to: 23
+      }
+      type: [CHILD]
+    }
+    type: RECURRING_EVENT
+    bookingMandatory: false
+    adultMandatory: false
+    category: MUSIC
+    price: {
+      from: 10.30
+      to: 103.42
+    }
+    when: {
+      
+        dateTime: {
+          from: "2019-12-01T10:00:00Z"
+          to: "2019-12-31T12:00:00Z"
+        }
+        occurrences: [
+        {dayOfWeek: MON
+        hours: {
+          from: "10:00:00Z"
+          to: "12:00:00Z"
+        }}
+        {dayOfWeek: TUE,
+        hours: {
+          from: "14:00:00Z"
+          to: "18:00:00Z"
+        }}
+      ]
+    }
+  }) {
+    id
+  }
+  }
+  
+mutation updateRecurringThingToDo {
+  updateThingToDo(input:{
+    id: "60ef1b0a-f418-52c6-9f08-c8265ff94ee4",
+    thingToDo: {
+    name: "d3333"
+    description: "desc"
+    where: {
+      address: "where name"
+      location: {
+        lat: 21
+        lon: 55
+     }
+    }
+    contact: {
+      email: "aaa@onet.pl"
+      phone: "434422333"
+      www: "https://example.com"
+    }
+    target: {
+      age: {
+        from: 3
+        to: 23
+      }
+      type: [CHILD]
+    }
+    type: RECURRING_EVENT
+    bookingMandatory: false
+    adultMandatory: false
+    category: MUSIC
+    price: {
+      from: 10.30
+      to: 103.42
+    }
+    when: {
+      
+        dateTime: {
+          from: "2019-12-01T10:00:00Z"
+          to: "2019-12-31T12:00:00Z"
+        }
+        occurrences: [
+          {dayOfWeek: MON
+        hours: {
+          from: "10:00:00Z"
+          to: "12:00:00Z"
+        }}
+        {dayOfWeek: TUE,
+        hours: {
+          from: "14:00:00Z"
+          to: "18:00:00Z"
+        }}
+      ]
+    }
+    }}) {
+    id
+  }
+  }  
+  
+  mutation updateThingToDo {
+  updateThingToDo(input:{
+    id: "dadd25ee-ffde-5468-b61a-9c2ba1d34155",
+    thingToDo: {
+    name: "d3333"
+    description: "desc"
+    where: {
+      address: "where name"
+      location: {
+        lat: 21
+        lon: 55
+     }
+    }
+    contact: {
+      email: "aaa@onet.pl"
+      phone: "434422333"
+      www: "https://example.com"
+    }
+    target: {
+      age: {
+        from: 3
+        to: 23
+      }
+      type: [CHILD]
+    }
+    type: EVENT
+    bookingMandatory: false
+    adultMandatory: false
+    category: MUSIC
+    price: {
+      from: 10.30
+      to: 103.42
+    }
+    when: {
+      
+        dateTime: {
+          from: "2019-12-01T10:00:00Z"
+          to: "2019-12-31T12:00:00Z"
+        }
+        occurrences: [
+          
+      ]
+    }
+    }}) {
+    id
+  }
+  }  

@@ -1,0 +1,31 @@
+---
+service: hopnamiasto-signup-service
+
+frameworkVersion: ">=1.21.0 <2.0.0"
+
+plugins:
+  - serverless-bundle
+  - serverless-pseudo-parameters
+  - serverless-iam-roles-per-function
+provider:
+  name: aws
+  stage: "${opt:stage, env:SLS_STAGE, 'dev'}"
+  region: eu-central-1
+  runtime: nodejs12.x
+  environment: 
+    LOG_LEVEL: ${self:custom.logLevel.${self:provider.stage}}
+package:
+  individually: true
+  exclude:
+    - "**/**"
+
+custom:
+  awsAccountId: "#{AWS::AccountId}"
+  oneTableName: ${self:provider.stage}-one-table
+  logLevel:
+    dev: DEBUG
+    test: DEBUG
+    prod: INFO  
+    
+functions:
+  - ${file(./initProfile/serverless.yml):functions}

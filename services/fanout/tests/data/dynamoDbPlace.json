@@ -1,0 +1,159 @@
+{
+  "__typename": {
+    "S": "Event"
+  },
+  "description": {
+    "S": "ppp"
+  },
+  "type": {
+    "S": "EVENT"
+  },
+  "__event__": {
+    "M": {
+      "type": {
+        "S": "PlaceChanged"
+      }
+    }
+  },
+  "when": {
+    "M": {
+      "date": {
+        "M": {
+          "from": {
+            "S": "2019-12-12"
+          },
+          "to": {
+            "S": "2019-12-12"
+          }
+        }
+      },
+      "time": {
+        "M": {
+          "from": {
+            "S": "12:00:00Z"
+          },
+          "to": {
+            "S": "14:00:00Z"
+          }
+        }
+      }
+    }
+  },
+  "adultMandatory": {
+    "BOOL": true
+  },
+  "recommended": {
+    "BOOL": true
+  },
+  "target": {
+    "M": {
+      "type": {
+        "L": [
+          {
+            "S": "ADULT"
+          },
+          {
+            "S": "CHILD"
+          },
+          {
+            "S": "FAMILY"
+          }
+        ]
+      },
+      "age": {
+        "M": {
+          "from": {
+            "N": "3"
+          },
+          "to": {
+            "N": "15"
+          }
+        }
+      }
+    }
+  },
+  "__context__": {
+    "M": {
+      "awsRequestId": {
+        "S": "d6082c47-f4d9-4699-9b87-dff715201684"
+      },
+      "x-correlation-id": {
+        "S": "4524b860d5855df0f1469ea0"
+      },
+      "call-chain-length": {
+        "N": "1"
+      },
+      "debug-log-enabled": {
+        "S": "false"
+      }
+    }
+  },
+  "price": {
+    "M": {
+      "from": {
+        "N": "23"
+      },
+      "to": {
+        "N": "100"
+      }
+    }
+  },
+  "contact": {
+    "M": {
+      "phone": {
+        "S": "72334232"
+      },
+      "www": {
+        "S": "http://example.com"
+      },
+      "email": {
+        "S": "mrk.waw.81+2@gmail.com"
+      }
+    }
+  },
+  "name": {
+    "S": "testevent"
+  },
+  "where": {
+    "M": {
+      "address": {
+        "M": {
+          "zipCode": {
+            "S": "00-000"
+          },
+          "city": {
+            "S": "w-wa"
+          },
+          "street": {
+            "S": "drawska"
+          }
+        }
+      },
+      "name": {
+        "S": "where-name"
+      },
+      "location": {
+        "M": {
+          "lon": {
+            "N": "21"
+          },
+          "lat": {
+            "N": "51"
+          }
+        }
+      }
+    }
+  },
+  "id": {
+    "S": "12a0f3de-b329-54d7-a00e-b5d766de22bb"
+  },
+  "sk": {
+    "S": "TTD"
+  },
+  "category": {
+    "S": "MUSIC"
+  },
+  "bookingMandatory": {
+    "BOOL": true
+  }
+}

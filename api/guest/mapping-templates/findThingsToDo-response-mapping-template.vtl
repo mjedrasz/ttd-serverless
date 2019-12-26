@@ -1,0 +1,93 @@
+#set ($hits = $context.result.hits.hits)
+#set ($total = $context.result.hits.total.value)
+#set ($resultSize = $hits.size())
+#if (!$util.isNull($ctx.args.first))
+    #set ($pageSize = $context.args.first)
+#elseif (!$util.isNull($ctx.args.last))
+    #set ($pageSize = $context.args.last)
+#else
+    #set ($pageSize = 10)
+#end
+#if ($resultSize > $pageSize)
+    #set ($records = $resultSize - 2)
+#else
+   #set ($records = $resultSize - 1)
+#end
+#set ($hasNext = $resultSize > $pageSize)
+#set ($startCursor = "")
+#set ($endCursor = "")
+#if(!$util.isNull($ctx.args.location))
+	#if(!$util.isNull($ctx.args.sort))
+		#set ($sortBy = $ctx.args.sort.sortBy)
+	#else
+		#set ($sortBy = "RELEVANCE")
+    #end
+    #if ($sortBy == "RELEVANCE")
+    	#set ($sortIndex = 2)
+    #elseif ($sortBy == "GEO_DISTANCE")
+    	#set ($sortIndex = 0)
+    #else
+    	#set ($sortIndex = 3)
+    #end
+#end
+
+{
+    "totalCount": $total,
+	"edges": [
+        #if ($records >= 0)
+        ## forward
+        #if ($util.isNull($ctx.args.before) && $util.isNull($ctx.args.last))
+    	    #foreach($i in [0..$records])
+              #set ($entry = $hits[$i])
+      	      #if ( $i > 0 ) , #end
+              {
+                #set ($node = $entry.get("_source"))
+                #set ($sort = $entry.get("sort"))
+                #if (!$util.isNull($sortIndex))
+                	$!node.put("distance", $sort[$sortIndex])
+                #end
+              	"node": $util.toJson($node),
+                #set ($json = $util.toJson($sort))
+                #set ($escaped = $util.toJson($json))
+                #set ($encoded = $util.base64Encode($escaped))
+                #if ($i == 0)
+                	#set ($startCursor = $encoded)
+                #elseif ( $i == $records )
+                	#set ($endCursor = $encoded)
+                #end
+                "cursor": "$encoded"
+              }
+    	    #end
+    	#else ##backward
+    	    #foreach($i in [0..$records])
+    	      #set ($pos = $records - $i)
+              #set ($entry = $hits[$pos])
+      	      #if ( $i > 0 ) , #end
+              {
+              	#set ($node = $entry.get("_source"))
+                #set ($sort = $entry.get("sort"))
+                #if (!$util.isNull($sortIndex))
+                	$!node.put("distance", $sort[$sortIndex])
+                #end
+              	"node": $util.toJson($node),
+                #set ($json = $util.toJson($sort))
+                #set ($escaped = $util.toJson($json))
+                #set ($encoded = $util.base64Encode($escaped))
+                #if ($i == 0)
+                	#set ($endCursor = $encoded)
+                #elseif ( $i == $records )
+                	#set ($startCursor = $encoded)
+                #end
+                "cursor": "$encoded"
+              }
+    	    #end
+    	#end
+    	#end
+    ],
+    "pageInfo": {
+    	"hasNextPage": $hasNext,
+        "hasPreviousPage": $hasNext,
+        "endCursor": #if (!$util.isNullOrBlank($endCursor)) "$endCursor" #else null #end,
+        "startCursor": #if (!$util.isNullOrBlank($startCursor)) "$startCursor" #else null #end
+    }
+}

@@ -1,0 +1,65 @@
+appSync:
+  name: ${self:provider.stage}-audit-api
+  authenticationType: API_KEY
+  mappingTemplatesLocation: "./audit/mapping-templates"
+  logConfig:
+    loggingRoleArn: { Fn::GetAtt: [AppSyncLoggingServiceRole, Arn] } # Where AppSyncLoggingServiceRole is a role with CloudWatch Logs write access
+    level: ALL # Logging Level: NONE | ERROR | ALL
+  mappingTemplates:
+    - dataSource: organisersByIds
+      type: ThingToDo
+      field: organiser
+      request: organisersByIds-request-mapping-template.vtl
+      response: organisersByIds-response-mapping-template.vtl
+    - dataSource: approveThingToDo
+      type: Mutation
+      field: approve
+      request: approve-request-mapping-template.vtl
+      response: approve-response-mapping-template.vtl
+    - dataSource: rejectThingToDo
+      type: Mutation
+      field: reject
+      request: reject-request-mapping-template.vtl
+      response: reject-response-mapping-template.vtl
+    - dataSource: OneTable
+      type: Query
+      field: pending
+      request: pending-request-mapping-template.vtl
+      response: pending-response-mapping-template.vtl
+  schema: ./audit/schema.graphql
+  serviceRole: appSync
+  dataSources:
+    - type: AMAZON_DYNAMODB
+      name: OneTable
+      description: 'DynamoDb'
+      config:
+        tableName: ${self:custom.oneTableName}
+        iamRoleStatements:
+          - Effect: "Allow"
+            Action:
+              - "dynamodb:GetItem"
+              - "dynamodb:Query"
+            Resource:
+              - 'arn:aws:dynamodb:${self:provider.region}:${self:custom.awsAccountId}:table/${self:custom.oneTableName}'
+              - 'arn:aws:dynamodb:${self:provider.region}:${self:custom.awsAccountId}:table/${self:custom.oneTableName}/*'        
+    - type: AWS_LAMBDA
+      name: approveThingToDo
+      description: 'Lambda DataSource'
+      config:
+        lambdaFunctionArn:
+          "arn:aws:lambda:${self:provider.region}:${self:custom.awsAccountId}:function:${self:provider.stage}-lambda-approve-thing-todo"
+    - type: AWS_LAMBDA
+      name: rejectThingToDo
+      description: 'Lambda DataSource'
+      config:
+        lambdaFunctionArn:
+          "arn:aws:lambda:${self:provider.region}:${self:custom.awsAccountId}:function:${self:provider.stage}-lambda-reject-thing-todo"
+    - type: AWS_LAMBDA
+      name: organisersByIds
+      description: 'Lambda DataSource'
+      config:
+        lambdaFunctionArn:
+          "arn:aws:lambda:${self:provider.region}:${self:custom.awsAccountId}:function:${self:provider.stage}-lambda-organisers-by-ids"      
+  substitutions:
+    env: "${self:provider.stage}"
+
