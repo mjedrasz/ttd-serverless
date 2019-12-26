@@ -15,6 +15,7 @@
   "dependencies": {
     "@dazn/lambda-powertools-dynamodb-client": "^1.14.0",
     "@dazn/lambda-powertools-logger": "^1.15.2",
-    "@dazn/lambda-powertools-pattern-basic": "^1.15.2"
+    "@dazn/lambda-powertools-pattern-basic": "^1.15.2",
+    "serialize-javascript": "^2.1.2"
   }
 }
