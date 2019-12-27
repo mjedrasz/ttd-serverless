@@ -4,12 +4,12 @@ Backend side of the things todo app which lets you find events and activities fo
 
 ## Getting Started
 
-For building and deploying you need a [Serverless framework](https://serverless.com/). This project also depends on AWS infrastructure set up by [ttd_infra](https://github.com/mjedrasz/ttd_infra).
+For building and deploying you need a [Serverless framework](https://serverless.com/). This project also depends on AWS infrastructure set up by [ttd-infra](https://github.com/mjedrasz/ttd-infra).
 
 ### Prerequisites
 
 * serverless framework
-* AWS infrastructure ([ttd_infra](https://github.com/mjedrasz/ttd_infra))
+* AWS infrastructure ([ttd-infra](https://github.com/mjedrasz/ttd-infra))
   
 ### Deploying
 
@@ -38,7 +38,7 @@ sls --stage test remove
 
 #### Elasticsearch setup
 
-Elasticsearch requires an additional step after setting up a domain (done by [ttd_infra](https://github.com/mjedrasz/ttd_infra)).
+Elasticsearch requires an additional step after setting up a domain (done by [ttd-infra](https://github.com/mjedrasz/ttd-infra)).
 
 Elasticsearch analyzers and mappings need to be setup. You can do that by invoking *esThingsToDoSetup* function.
 
@@ -88,7 +88,7 @@ Due to non transactional nature of the DynamoDB it's important to execute tests 
 
 ## Architecture
 
-The project (this and [ttd_terraform](https://github.com/mjedrasz/ttd_terraform)/[ttd_infra](https://github.com/mjedrasz/ttd_infra) duo) consists of several AWS lambda functions and AWS services.
+The project (this and [ttd-terraform](https://github.com/mjedrasz/ttd-terraform)/[ttd-infra](https://github.com/mjedrasz/ttd-infra) duo) consists of several AWS lambda functions and AWS services.
 * Cognito - authentication and authorization
 * AppSync - managed GraphQL service
 * Elasticsearch service - managed Elasticsearch
@@ -101,7 +101,7 @@ The project (this and [ttd_terraform](https://github.com/mjedrasz/ttd_terraform)
 
 All services but Elasticsearch follow serverless paradigm. The high-level architecture of the project is presented below.
 
-![alt text](hopnamiasto-arch.png)
+![alt text](ttd-arch.png)
 
 ### Single table design
 
