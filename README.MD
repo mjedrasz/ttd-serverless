@@ -99,6 +99,8 @@ The project (this and [ttd-terraform](https://github.com/mjedrasz/ttd-terraform)
 * SNS - pub/sub messaging
 * SQS - queue service
 * Lambda - functions
+* CloudFront - CDN
+* Pinpoint - analytics
 
 All services but Elasticsearch follow serverless paradigm. The high-level architecture of the project is presented below.
 
