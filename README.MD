@@ -74,7 +74,7 @@ docker run -d --name elasticsearch -p 9200:9200 -p 9300:9300 -e "discovery.type=
 Elasticsearch setup is automatically done by the tests. However, DynamoDB requires a manual step to set up tables (it could be automated, but I store DynamoDB schema/index information in terraform). The following command sets up DynamoDB tables and indices based on a terraform configuration.
 
 ```
-ttd_infra/non-prod/local/dynamoDb>terragrunt apply
+ttd-infra/non-prod/local/dynamoDb>terragrunt apply
 ```
 
 ### Running the tests
