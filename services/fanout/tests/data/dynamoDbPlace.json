@@ -107,7 +107,7 @@
         "S": "http://example.com"
       },
       "email": {
-        "S": "mrk.waw.81+2@gmail.com"
+        "S": "test@example.com"
       }
     }
   },

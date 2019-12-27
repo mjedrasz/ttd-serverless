@@ -8,7 +8,7 @@ functions:
     memorySize: 128 # optional, in MB, default is 1024
     timeout: 10 # optional, default is 6
     environment:
-      EMAIL_SOURCE: 'mrk.waw.81@gmail.com'
+      EMAIL_SOURCE: 'no-reply@ttd.pl'
       SES_REGION: ${self:custom.sesRegion}
     iamRoleStatements:
       - Effect: Allow
