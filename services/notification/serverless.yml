@@ -40,8 +40,5 @@ custom:
 functions:
   - ${file(./contactUs/serverless.yml):functions}
   - ${file(./notifyUs/serverless.yml):functions}
-  # - ${file(./savePushMessageToken/serverless.yml):functions}
   - ${file(./sendEmail/serverless.yml):functions}
-  # - ${file(./sendPushMessage/serverless.yml):functions}
-  # - ${file(./sendPushMessageToUser/serverless.yml):functions}
 
