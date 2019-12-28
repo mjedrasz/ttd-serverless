@@ -91,6 +91,7 @@ Due to non transactional nature of the DynamoDB it's important to execute tests 
 The project (this and [ttd-terraform](https://github.com/mjedrasz/ttd-terraform)/[ttd-infra](https://github.com/mjedrasz/ttd-infra) duo) consists of several AWS lambda functions and AWS services.
 * Cognito - authentication and authorization
 * AppSync - managed GraphQL service
+* DynamoDB - schemaless database
 * Elasticsearch service - managed Elasticsearch
 * Route 53 - DNS
 * S3 - serving static assets and hosting web app
