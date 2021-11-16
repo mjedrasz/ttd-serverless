@@ -18,7 +18,7 @@
     "@dazn/lambda-powertools-lambda-client": "^1.15.2",
     "@dazn/lambda-powertools-logger": "^1.15.2",
     "@dazn/lambda-powertools-pattern-basic": "^1.15.2",
-    "aws-sdk": "^2.580.0",
+    "aws-sdk": "^2.814.0",
     "cron-parser": "^2.13.0",
     "date-fns": "^2.8.1",
     "elasticsearch": "^16.5.0",
