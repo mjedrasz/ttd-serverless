@@ -7,7 +7,7 @@
     "test": "serverless-bundle test"
   },
   "devDependencies": {
-    "serverless": "^1.58.0",
+    "serverless": "^3.25.1",
     "serverless-bundle": "^1.2.5",
     "serverless-iam-roles-per-function": "^2.0.2",
     "serverless-pseudo-parameters": "^2.5.0"
